@@ -195,7 +195,7 @@ export function criaTunel()
     // Geometria do cilindro interno para a cavidade
     const Geometry2 = new THREE.CylinderGeometry(raioInterno, raioInterno, comprimento, 32);
     // Geometria do Torus Knot para os furos (ajustei o primeiro parâmetro para manter a proporção)
-    const Geometry3 = new THREE.TorusKnotGeometry(raioExterno * 1.5, 2.5, 100, 16); // 11 * 1.5 = 16.5
+    const Geometry3 = new THREE.CylinderGeometry(2.5, 4, 50, 32);// 11 * 1.5 = 16.5
 
     const cylinder = new THREE.Mesh(Geometry, material3);
     const cylinder2 = new THREE.Mesh(Geometry2 , material3);
@@ -212,7 +212,7 @@ export function criaTunel()
     updateObject(cylinder2);
     
     // --- Furos: Posição e Rotação ---
-    furos1.rotateY(THREE.MathUtils.degToRad(45));
+    //furos1.rotateY(THREE.MathUtils.degToRad(45));
     furos1.rotateX(THREE.MathUtils.degToRad(25));
     furos1.position.set(0.0, 5.0, 15.0); // Ajustando a posição Y
     updateObject(furos1);
@@ -222,8 +222,8 @@ export function criaTunel()
     furos2.position.set(0.0, 5.0, -10.0); // Ajustando a posição Y
     updateObject(furos2);
     
-    furos3.rotateY(THREE.MathUtils.degToRad(75));
-    furos3.rotateX(THREE.MathUtils.degToRad(215));
+    furos3.rotateY(THREE.MathUtils.degToRad(285));
+    furos3.rotateX(THREE.MathUtils.degToRad(55));
     furos3.position.set(0.0, 5.0, 0.0); // Ajustando a posição Y
     updateObject(furos3);
     
