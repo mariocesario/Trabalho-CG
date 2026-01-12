@@ -1,7 +1,10 @@
 // Car.js
 import * as THREE from 'three';
+    import { CSG } from '../libs/other/CSGMesh.js';
 import { setDefaultMaterial, degreesToRadians } from "../libs/util/util.js";
 
+
+let material = setDefaultMaterial('rgba(189, 82, 32, 1)');
 // ------------------------------------------------------------
 // POSIÇÕES INICIAIS — 3 PISTAS
 // ------------------------------------------------------------
@@ -22,38 +25,45 @@ export const START_ROT_TRACK3 = degreesToRadians(0);
 // FUNÇÃO GENÉRICA DE CRIAÇÃO DO MODELO DO HOVERCRAFT
 // (usada tanto para o jogador quanto para o adversário)
 // ------------------------------------------------------------
-function buildHovercraft(baseMat, bodyMat, cabineMat, noseMat) {
+export function buildHovercraft(baseMat, bodyMat, cabineMat, noseMat) {
+
+  const geometry = new THREE.BoxGeometry( 4, 3.5, 2.5 );
+  const geometry2 = new THREE.CylinderGeometry( 2.5, 2.5, 2.5, 14);
+  const geometry3 = new THREE.BoxGeometry( 3.5, 1, 2.5);
+  
+  const baseG = new THREE.Mesh(geometry, material);
+  const add =new THREE.Mesh(geometry2, material);
+  const add2 =new THREE.Mesh(geometry2, material);
+  
+  baseG.position.set(0, 1.5, 0);
+  baseG.rotateX(THREE.MathUtils.degToRad(90));
+  updateObject(baseG);
+  add.position.set(3.5, 1.5, 0);
+  updateObject(add);
+  add2.position.set(-3.5, 1.5, 0);
+  updateObject(add2);
+  
+  let baseCSG = CSG.fromMesh(baseG);
+  baseCSG =baseCSG.union(CSG.fromMesh(add));
+  baseCSG =baseCSG.union(CSG.fromMesh(add2));
+  
+  
+  
+  const baseMesh = CSG.toMesh(baseCSG, baseG.matrix, material);
 
   const craft = new THREE.Group();
 
-  const base = new THREE.Mesh(
-    new THREE.TorusGeometry(1.3, 0.25, 16, 32),
-    baseMat
-  );
-  base.rotation.x = Math.PI / 2;
+  const base = baseMesh
+  base.position.y = 1.5;
   craft.add(base);
 
   const body = new THREE.Mesh(
-    new THREE.CylinderGeometry(1.2, 1.4, 0.8, 16),
+    geometry3,
     bodyMat
   );
-  body.position.y = 0.55;
+  body.position.y = 3;
+  body.position.x = -1;
   craft.add(body);
-
-  const cabine = new THREE.Mesh(
-    new THREE.BoxGeometry(1.0, 0.5, 0.7),
-    cabineMat
-  );
-  cabine.position.set(0, 1.0, 0);
-  craft.add(cabine);
-
-  const nose = new THREE.Mesh(
-    new THREE.ConeGeometry(0.4, 1.0, 16),
-    noseMat
-  );
-  nose.rotation.z = Math.PI / 2;
-  nose.position.set(1.7, 0.35, 0);
-  craft.add(nose);
 
   return craft;
 }
@@ -72,7 +82,7 @@ export function createCar(scene) {
   );
 
   // posição inicial padrão
-  car.position.set(-100.0, -0.5, -100.0);
+  car.position.set(-100.0, 0, -100.0);
 
   car.userData = {
     speed: 0,
@@ -83,42 +93,87 @@ export function createCar(scene) {
     maxReverseSpeed: -30,
     turnSpeed: THREE.MathUtils.degToRad(120)
   };
-
-  car.traverse(obj => {
-    if (obj.isMesh) {
-        obj.castShadow = true;
-        obj.receiveShadow = true;
-    }
-});
-
   scene.add(car);
   return car;
 }
 
 
 // ------------------------------------------------------------
+// CARRO ADVERSÁRIO (NOVO)
+// ------------------------------------------------------------
+export function createEnemyCar(scene) {
+
+  // Materiais foscos (Lambert)
+  const matteRed    = new THREE.MeshLambertMaterial({ color: 0xaa0000 });
+  const matteBlue   = new THREE.MeshLambertMaterial({ color: 0x0033aa });
+
+  // Material brilhante (Phong)
+  const shinyYellow = new THREE.MeshPhongMaterial({
+    color: 0xffff00,
+    shininess: 100
+  });
+
+  // Cria hovercraft adversário
+  const enemy = buildHovercraft(
+    matteBlue,     // base fosca azul
+    shinyYellow,   // corpo brilhante amarelo
+    matteRed,      // cabine fosca vermelha
+    shinyYellow    // nariz brilhante amarelo
+  );
+
+  enemy.position.set(-110, 0.5, -100);
+  enemy.rotation.y = 0;
+
+  enemy.userData = {
+    speed: 0,
+    accel: 12.0,
+    brake: 10.0,
+    drag: 10,
+    maxSpeed: 18,
+    turnSpeed: THREE.MathUtils.degToRad(70),
+
+    // controle do bot
+    aiEnabled: true,
+    aiTargetIndex: 0
+  };
+
+  scene.add(enemy);
+  return enemy;
+}
+
+
+// ------------------------------------------------------------
 // RESET DO CARRO POR PISTA
 // ------------------------------------------------------------
-export function resetCarPosition(car, trackNumber) {
-  let newPos, newRot;
+export function resetCarPosition(car,enemy, trackNumber) {
+  let newPos, newRot, newPoscar2, newRotcar2;
   if (trackNumber === 1) {
     newPos = START_POS_TRACK1;
     newRot = START_ROT_TRACK1;
+    newPoscar2 = START_POS_TRACKcar2;
+    newRotcar2 = START_ROT_TRACKcar2;
   } else if (trackNumber === 2) {
     newPos = START_POS_TRACK2;
     newRot = START_ROT_TRACK2;
+    newPoscar2 = START_POS_TRACKcar2;
+    newRotcar2 = START_ROT_TRACKcar2;
   } else if (trackNumber === 3) {
     newPos = START_POS_TRACK3;
     newRot = START_ROT_TRACK3;
+    newPoscar2 = START_POS_TRACKcar2;
+    newRotcar2 = START_ROT_TRACKcar2;
   } else {
     newPos = START_POS_TRACK1;
     newRot = START_ROT_TRACK1;
+    newPoscar2 = START_POS_TRACKcar2;
+    newRotcar2 = START_ROT_TRACKcar2;
   }
   car.position.copy(newPos);
   car.rotation.y = newRot;
   car.userData.speed = 0;
-  
-
+  enemy.position.copy(newPoscar2);
+  enemy.rotation.y = newRotcar2;
+  enemy.userData.speed = 0;
 }
 
 
@@ -153,11 +208,12 @@ export function updateCar(car, delta, moveDirection) {
   else if (moveDirection.right)
     car.rotation.y -= carData.turnSpeed * delta;
 
-  // Mover usando a velocidade atual na direção que está olhando
-  const forwardDir = new THREE.Vector3(
-    Math.cos(car.rotation.y),
-    0,
-    -Math.sin(car.rotation.y)
-  );
-  car.position.addScaledVector(forwardDir, carData.speed * delta);
+  // Mover
+  car.translateX(carData.speed * delta);
+}
+
+function updateObject(mesh)
+{
+   mesh.matrixAutoUpdate = false;
+   mesh.updateMatrix();
 }
