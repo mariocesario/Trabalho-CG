@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { degreesToRadians } from "../libs/util/util.js";
 import { START_POS_TRACK1, START_POS_TRACK2, START_POS_TRACK3 } from './Car.js';
+import { texturaAsfalto } from './Texture.js';
 
 export let track1 = null;
 export let track2 = null;
@@ -102,10 +103,10 @@ export function createSquareTrackElements(trackGroup, material) {
   const gX = new THREE.PlaneGeometry(200, trackWidth);
   const gZ = new THREE.PlaneGeometry(trackWidth, 200);
 
-  const p1 = new THREE.Mesh(gX, material);
-  const p2 = new THREE.Mesh(gX, material);
-  const p3 = new THREE.Mesh(gZ, material);
-  const p4 = new THREE.Mesh(gZ, material);
+  const p1 = texturaAsfalto(gX);
+  const p2 = texturaAsfalto(gX);
+  const p3 = texturaAsfalto(gZ);
+  const p4 = texturaAsfalto(gZ);
 
   let rot = new THREE.Matrix4().makeRotationX(degreesToRadians(-90));
 
@@ -148,7 +149,8 @@ export function createLTrackElements(trackGroup, material) {
       ? new THREE.PlaneGeometry(s.length, trackWidth)
       : new THREE.PlaneGeometry(trackWidth, s.length);
 
-    let mesh = new THREE.Mesh(geo, material);
+    //let mesh = new THREE.Mesh(geo, material);
+    let mesh = texturaAsfalto(geo);
     mesh.matrixAutoUpdate = false;
     mesh.matrix.identity()
       .multiply(new THREE.Matrix4().makeTranslation(s.pos.x, s.pos.y, s.pos.z))
@@ -182,7 +184,8 @@ export function createFourQuadrantTrack(trackGroup, material) {
       ? new THREE.PlaneGeometry(s.length, trackWidth)
       : new THREE.PlaneGeometry(trackWidth, s.length);
 
-    let mesh = new THREE.Mesh(geo, material);
+    //let mesh = new THREE.Mesh(geo, material);
+    let mesh = texturaAsfalto(geo);
     mesh.matrixAutoUpdate = false;
     mesh.matrix.identity()
       .multiply(new THREE.Matrix4().makeTranslation(s.pos.x, s.pos.y, s.pos.z))

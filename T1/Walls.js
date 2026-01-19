@@ -1,5 +1,6 @@
 // Walls.js
 import * as THREE from 'three';
+import {texturaTest} from './Texture.js';
 
 export const barreirasTrack1 = [];
 export const barreirasTrack2 = [];

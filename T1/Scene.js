@@ -31,6 +31,8 @@ import { createGroundPlane } from './Ground.js';
 import { updateCameraFollow } from './Camera.js';
 import { checkLapCount, resetLapSystem, MAX_LAPS, winner } from './Misc.js';
 
+import { Skybox } from './Texture.js';
+
 // ------------------------------------------------------------
 // SCENE
 // ------------------------------------------------------------
@@ -128,7 +130,7 @@ controls.show();
 // CREATE WORLD
 // ------------------------------------------------------------
 createTrack(scene, materialPista);
-createGroundPlane(scene, materialChao);
+createGroundPlane(scene,1);
 
 // Walls creation
 createSquareWalls();
@@ -183,6 +185,7 @@ function keyboardUpdate() {
   // TRACK 1
   if (keyboard.down("1") && currentTrack !== 1) {
     currentTrack = 1;
+    createGroundPlane(scene,currentTrack);
     track1.visible = true;
     track2.visible = false;
     track3.visible = false;
@@ -202,6 +205,7 @@ function keyboardUpdate() {
   // TRACK 2
   if (keyboard.down("2") && currentTrack !== 2) {
     currentTrack = 2;
+    createGroundPlane(scene,currentTrack);
     track1.visible = false;
     track2.visible = true;
     track3.visible = false;
@@ -224,6 +228,7 @@ function keyboardUpdate() {
   // TRACK 3 (NOVA)
   if (keyboard.down("3") && currentTrack !== 3) {
     currentTrack = 3;
+    createGroundPlane(scene,currentTrack);
     track1.visible = false;
     track2.visible = false;
     track3.visible = true;
@@ -374,6 +379,8 @@ function checkCarToCarCollision(car1, car2) {
 // ------------------------------------------------------------
 function render() {
   keyboardUpdate();
+
+  Skybox(scene);
 
   const delta = clock.getDelta();
   updateCar(car, delta, moveDirection);

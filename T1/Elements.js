@@ -10,6 +10,9 @@ import {initRenderer,
     createGroundPlaneXZ} from "../libs/util/util.js";
 import { barreirasTrack2, barreirasTrack3 } from './Walls.js';
 
+var textureloader = new THREE.TextureLoader();
+
+
 let material ,material2 ,material3 //Initial variables
 // scene = new THREE.Scene();    // Create main scene
 // renderer = initRenderer();    // Init a basic renderer
@@ -112,9 +115,12 @@ export function criaArvore1()
     const troncoCSG = CSG.fromMesh(cylinder).union(CSG.fromMesh(cylinder2));
     const folhasCSG = CSG.fromMesh(folha).union(CSG.fromMesh(folha2));
 
+    var folhaarv = textureloader.load('../assets/textures/grass.jpg');
+    var folhaMaterial = new THREE.MeshLambertMaterial();
+        folhaMaterial.map = folhaarv;
     // === Converter novamente para Mesh (mantendo materiais distintos) ===
     const troncoMesh = CSG.toMesh(troncoCSG, new THREE.Matrix4(), material);
-    const folhasMesh = CSG.toMesh(folhasCSG, new THREE.Matrix4(), material2);
+    const folhasMesh = CSG.toMesh(folhasCSG, new THREE.Matrix4(), folhaMaterial);
 
      // === Agrupar tronco + folhas ===
     const arvore = new THREE.Group();
@@ -164,10 +170,13 @@ export function criaArvore2()
     const troncoCSG = CSG.fromMesh(cylinder).union(CSG.fromMesh(cylinder4),CSG.fromMesh(cylinder3));
     const folhasCSG = CSG.fromMesh(folha).union(CSG.fromMesh(folha2));
 
+    var folhaarv = textureloader.load('../assets/textures/grass.jpg');
+    var folhaMaterial = new THREE.MeshLambertMaterial();
+        folhaMaterial.map = folhaarv;
     // === Converter novamente para Mesh (mantendo materiais distintos) ===
     const troncoMeshaux = CSG.toMesh(troncoCSGaux, new THREE.Matrix4(), material);
     const troncoMesh = CSG.toMesh(troncoCSG, new THREE.Matrix4(), material);
-    const folhasMesh = CSG.toMesh(folhasCSG, new THREE.Matrix4(), material2);
+    const folhasMesh = CSG.toMesh(folhasCSG, new THREE.Matrix4(), folhaMaterial);
 
      // === Agrupar tronco + folhas ===
     const arvore = new THREE.Group();
@@ -197,7 +206,7 @@ export function criaTunel()
     // Geometria do Torus Knot para os furos (ajustei o primeiro parâmetro para manter a proporção)
     const Geometry3 = new THREE.CylinderGeometry(2.5, 4, 50, 32);// 11 * 1.5 = 16.5
 
-    const cylinder = new THREE.Mesh(Geometry, material3);
+    const cylinder = new THREE.Mesh(Geometry , material3);
     const cylinder2 = new THREE.Mesh(Geometry2 , material3);
     const furos1 = new THREE.Mesh(Geometry3 , material3);
     const furos2 = new THREE.Mesh(Geometry3 , material3);
@@ -264,10 +273,12 @@ export function criaTunel()
 
     // 3. **NOVO**: Corta a metade inferior
     tunelCSG = tunelCSG.subtract(CSG.fromMesh(corteInferiorMesh)); // Subtrai a caixa de corte inferior
-    
 
-    const tunelMesh = CSG.toMesh(tunelCSG, new THREE.Matrix4(), material3);
+    var cement = textureloader.load('../assets/textures/darkcement.jpg');
+    var tunelMaterial = new THREE.MeshLambertMaterial();
+        tunelMaterial.map = cement;
 
+    const tunelMesh = CSG.toMesh(tunelCSG, new THREE.Matrix4(), tunelMaterial);
     
     // === Ajustes finais ===
     tunelMesh.position.set(0, 0, 0);

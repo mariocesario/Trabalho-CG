@@ -1,0 +1,85 @@
+import * as THREE from  'three';
+import {CubeTextureLoaderSingleFile} from '../libs/util/cubeTextureLoaderSingleFile.js';
+import { EqualStencilFunc } from '../build/three.core.js';
+
+export function texturaTest(geometria)
+{
+    var textureloader = new THREE.TextureLoader();
+    var stone = textureloader.load('../assets/textures/stone.jpg');
+
+    var cubeMaterial = new THREE.MeshLambertMaterial();
+    cubeMaterial.map = stone;
+    var cube = new THREE.Mesh(geometria, cubeMaterial);
+
+    return cube;
+}
+
+export function texturaAsfalto(geometria)
+{
+    var textureloader = new THREE.TextureLoader();
+    var asfalto = textureloader.load('../assets/textures/asfalto.jpg');
+    asfalto.wrapS = THREE.RepeatWrapping;
+    asfalto.wrapT = THREE.RepeatWrapping;
+
+    var pistaMaterial = new THREE.MeshLambertMaterial();
+    pistaMaterial.map = asfalto;
+    var pista = new THREE.Mesh(geometria, pistaMaterial);
+    pista.material.map.repeat.x = 3;
+    pista.material.map.repeat.y = 3;
+
+    return pista;
+}
+
+export function texturaFolha(geometria)
+{
+    var textureloader = new THREE.TextureLoader();
+    var chao = textureloader.load('../assets/textures/grass.jpg');
+
+    var chaoMaterial = new THREE.MeshLambertMaterial();
+    chaoMaterial.map = chao;
+    var plano = new THREE.Mesh(geometria, chaoMaterial);
+
+    return plano;
+}
+
+export function texturaTronco(geometria)
+{
+    var textureloader = new THREE.TextureLoader();
+    var chao = textureloader.load('../assets/textures/grass.jpg');
+
+    var chaoMaterial = new THREE.MeshLambertMaterial();
+    chaoMaterial.map = chao;
+    var plano = new THREE.Mesh(geometria, chaoMaterial);
+
+    return plano;
+}
+
+export function Skybox(scene)
+{
+    
+    let cubeMapTexture = new CubeTextureLoaderSingleFile().load('../assets/textures/skybox/canyonCross.jpg', 1);
+    scene.background = cubeMapTexture;
+}
+
+export function texturaExterna(geometria,n)
+{
+    var textureloader = new THREE.TextureLoader();
+    if(n == 1)
+    {
+        var areaExter =textureloader.load('../assets/textures/grass.jpg');
+    }
+    else if(n== 2)
+    {
+        var areaExter =textureloader.load('../assets/textures/sand.jpg');
+    }
+    else
+    {
+        var areaExter =textureloader.load('../assets/textures/cement.jpg');
+    }
+
+    var areaEX = new THREE.MeshLambertMaterial();
+    areaEX.map = areaExter;
+    var area = new THREE.Mesh(geometria,areaEX);
+
+    return area;
+}
