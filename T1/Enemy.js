@@ -1,73 +1,26 @@
       // Enemy.js
-      import * as THREE from 'three';
-      import { setDefaultMaterial, degreesToRadians } from "../libs/util/util.js";
-      import {
-      checkpointsTrack1,
-      checkpointsTrack2,
-      checkpointsTrack3,
-      MAX_LAPS,
-      setEnemyWinner
-      } from './Misc.js';
+    import * as THREE from 'three';
+    import { setDefaultMaterial, degreesToRadians } from "../libs/util/util.js";
+    import { START_POS_TRACK1, START_POS_TRACK2, START_POS_TRACK3 } from './Car.js';
+    import {
+    checkpointsTrack1,
+    checkpointsTrack2,
+    checkpointsTrack3,
+    MAX_LAPS,
+    setEnemyWinner
+    } from './Misc.js';
 
-      // ------------------------------------------------------------
-      // POSIÇÕES INICIAIS DO ENEMY
-      // ------------------------------------------------------------
-      export const START_POS_TRACKcar2 = new THREE.Vector3(-40, 0.5, -95);
-      export const START_ROT_TRACKcar2 = degreesToRadians(0);
+    // ------------------------------------------------------------
+    // POSIÇÕES INICIAIS DO ENEMY (usando valores de `Car.js`)
+    // ------------------------------------------------------------
+    export const START_ROT_TRACKcar2 = degreesToRadians(0);
 
       // ------------------------------------------------------------
       // CONTROLE DE PROGRESSO DO INIMIGO POR PISTA
       // ------------------------------------------------------------
-      export let enemyCheckpointIndex = {
-      1: 0,
-      2: 0,
-      3: 0
-      };
-
-      // Rastreia se o adversário já entrou no raio do checkpoint atual
-      // Isso evita que ele avance múltiplas vezes no mesmo checkpoint
-      let enemyInsideCheckpoint = {
-      1: false,
-      2: false,
-      3: false
-      };
-
-      // Rastreia o ângulo alvo para curvas suaves nas pistas 1 e 2
-      let enemyTargetRotation = {
-      1: null,
-      2: null
-      };
-
-      // Rastreia voltas do adversário por pista
-      let enemyLapCount = {
-      1: 0,
-      2: 0,
-      3: 0
-      };
-
-      // Rastreia se o adversário completou todos os checkpoints (pronto para próxima volta)
-      let enemySequenceComplete = {
-      1: false,
-      2: false,
-      3: false
-      };
-
-      export function resetEnemyCheckpointIndex() {
-      enemyCheckpointIndex[1] = 0;
-      enemyCheckpointIndex[2] = 0;
-      enemyCheckpointIndex[3] = 0;
-      enemyInsideCheckpoint[1] = false;
-      enemyInsideCheckpoint[2] = false;
-      enemyInsideCheckpoint[3] = false;
-      enemyTargetRotation[1] = null;
-      enemyTargetRotation[2] = null;
-      enemyLapCount[1] = 0;
-      enemyLapCount[2] = 0;
-      enemyLapCount[3] = 0;
-      enemySequenceComplete[1] = false;
-      enemySequenceComplete[2] = false;
-      enemySequenceComplete[3] = false;
-      }
+      
+     
+    // Nota: o estado de IA por inimigo é armazenado em `enemy.userData.ai`
 
 
       // ------------------------------------------------------------
@@ -104,6 +57,7 @@
       );
       nose.rotation.z = Math.PI / 2;
       nose.position.set(1.7, 0.35, 0);
+    nose.name = 'nose';
       craft.add(nose);
 
       return craft;
@@ -112,7 +66,7 @@
       // ------------------------------------------------------------
       // CARRO ADVERSÁRIO
       // ------------------------------------------------------------
-      export function createEnemyCar(scene) {
+    export function createEnemyCar(scene, id = null) {
       // Materiais foscos (Lambert)
       const matteRed    = new THREE.MeshLambertMaterial({ color: 0xaa0000 });
       const matteBlue   = new THREE.MeshLambertMaterial({ color: 0x0033aa });
@@ -131,11 +85,14 @@
           shinyYellow    // nariz brilhante amarelo
       );
 
-      enemy.position.set(-110, 0.5, -100);
+    enemy.position.set(-110, START_POS_TRACK1.y - 0.4, -100);
       enemy.rotation.y = 0;
 
       enemy.userData = {
           speed: 0, // Velocidade inicial zero - vai acelerar gradualmente
+          health: 100,
+          maxShotsPerLap: 4,
+          shotsRemaining: 4,
           accel: 12.0,
           brake: 10.0,
           drag: 10,
@@ -146,6 +103,20 @@
           aiEnabled: true,
           aiTargetIndex: 0
       };
+      // identifica este inimigo
+      enemy.userData.id = id;
+      enemy.name = id != null ? `enemy${id}` : enemy.name;
+      // projéteis e cooldown de tiro
+    enemy.userData.projectiles = [];
+    enemy.userData.shootCooldown = Math.random() * 2 + 1; // 1-3s
+    enemy.userData.prevLapCount = 0;
+          // Estado da IA específico por inimigo
+          enemy.userData.ai = {
+              checkpointIndex: { 1: 0, 2: 0, 3: 0 },
+              insideCheckpoint: { 1: false, 2: false, 3: false },
+              targetRotation: { 1: null, 2: null },
+              lapCount: { 1: 0, 2: 0, 3: 0 }
+          };
       
       enemy.traverse(obj => {
     if (obj.isMesh) {
@@ -162,30 +133,45 @@
       // RESET DO CARRO INIMIGO POR PISTA
       // ------------------------------------------------------------
       export function resetEnemyPosition(enemy, trackNumber) {
-      let newPos, newRot;
-      
-      if (trackNumber === 1) {
-          newPos = START_POS_TRACKcar2;
-          newRot = START_ROT_TRACKcar2;
-      } else if (trackNumber === 2) {
-          newPos = START_POS_TRACKcar2;
-          newRot = START_ROT_TRACKcar2;
-      } else if (trackNumber === 3) {
-          newPos = START_POS_TRACKcar2;
-          newRot = START_ROT_TRACKcar2;
-      } else {
-          newPos = START_POS_TRACKcar2;
-          newRot = START_ROT_TRACKcar2;
+        let basePos = START_POS_TRACK1.clone();
+        const newRot = START_ROT_TRACKcar2;
+        if (trackNumber === 1) basePos.copy(START_POS_TRACK1);
+        else if (trackNumber === 2) basePos.copy(START_POS_TRACK2);
+        else if (trackNumber === 3) basePos.copy(START_POS_TRACK3);
+
+        // Posição base sobre a pista (ajustada para sentar sobre o topo da pista)
+        const baseX = basePos.x;
+        const baseY = basePos.y - 0.4;
+        const baseZ = basePos.z;
+
+        // Posiciona inimigos em formação relativa ao START_POS do track:
+        // id == 1 => frente (0, +10)
+        // id == 2 => direita (+10, 0) — jogador fica à esquerda deste inimigo
+        // id == 3 => frente-da-direita (+10, +10)
+        const id = enemy.userData && enemy.userData.id ? enemy.userData.id : 1;
+        let offX = 0, offZ = 0;
+        if (id === 1) { offX = 0;  offZ = 10; }
+        else if (id === 2) { offX = -10; offZ = 0; }
+        else if (id === 3) { offX = -10; offZ = 10; }
+
+        enemy.position.set(baseX + offX, baseY, baseZ + offZ);
+        enemy.rotation.y = newRot;
+        enemy.userData.speed = 0;
+
+      // Garante que o estado de IA exista
+      if (!enemy.userData.ai) {
+          enemy.userData.ai = {
+              checkpointIndex: { 1: 0, 2: 0, 3: 0 },
+              insideCheckpoint: { 1: false, 2: false, 3: false },
+              targetRotation: { 1: null, 2: null },
+              lapCount: { 1: 0, 2: 0, 3: 0 }
+          };
       }
-      
-      enemy.position.copy(newPos);
-      enemy.rotation.y = newRot;
-      enemy.userData.speed = 0;
-      
-      // Reseta o checkpoint index quando troca de pista
-      enemyCheckpointIndex[trackNumber] = 0;
-      enemyInsideCheckpoint[trackNumber] = false;
-      enemyTargetRotation[trackNumber] = null;
+
+      // Reseta apenas o estado do inimigo passado
+      enemy.userData.ai.checkpointIndex[trackNumber] = 0;
+      enemy.userData.ai.insideCheckpoint[trackNumber] = false;
+      enemy.userData.ai.targetRotation[trackNumber] = null;
       }
 
       // ------------------------------------------------------------
@@ -196,31 +182,36 @@
       // ------------------------------------------------------------
       // ÍNDICES DO ALVO DO INIMIGO (para referência futura)
       // ------------------------------------------------------------
-      let enemyTargetIndex1 = 0;
-      let enemyTargetIndex2 = 0;
-      let enemyTargetIndex3 = 0;
+    // Os índices por inimigo não são mais globais; cada inimigo guarda seu próprio AI
 
       // ------------------------------------------------------------
       // FUNÇÃO PRINCIPAL — IA DO INIMIGO
       // ------------------------------------------------------------
       export function updateEnemyCar(enemyCar, delta, currentTrack) {
-      let checkpoints = null;
+        let checkpoints = null;
 
       if (currentTrack === 1) checkpoints = checkpointsTrack1;
       if (currentTrack === 2) checkpoints = checkpointsTrack2;
       if (currentTrack === 3) checkpoints = checkpointsTrack3;
 
       if (!checkpoints || checkpoints.length === 0) return;
+    // usa estado de IA do próprio inimigo
+    const ai = enemyCar.userData.ai || {
+            checkpointIndex: { 1: 0, 2: 0, 3: 0 },
+            insideCheckpoint: { 1: false, 2: false, 3: false },
+            targetRotation: { 1: null, 2: null },
+            lapCount: { 1: 0, 2: 0, 3: 0 }
+    };
 
-      // índice do checkpoint que o bot precisa ir
-      let idx = enemyCheckpointIndex[currentTrack];
-      
-      // Garante que o índice está dentro dos limites (usando módulo para voltar ao início)
-      if (idx < 0) idx = 0;
-      if (idx >= checkpoints.length) idx = idx % checkpoints.length;
-      
-      // Atualiza o índice se necessário
-      enemyCheckpointIndex[currentTrack] = idx;
+    // índice do checkpoint que o bot precisa ir
+    let idx = ai.checkpointIndex[currentTrack];
+
+    // Garante que o índice está dentro dos limites (usando módulo para voltar ao início)
+    if (idx < 0) idx = 0;
+    if (idx >= checkpoints.length) idx = idx % checkpoints.length;
+
+    // Atualiza o índice no estado do inimigo
+    ai.checkpointIndex[currentTrack] = idx;
 
       // checkpoint alvo atual
       const currentCheckpoint = checkpoints[idx];
@@ -235,120 +226,49 @@
       // LÓGICA SIMPLIFICADA PARA PISTAS 1 E 2
       // ------------------------------------------------------------
       if (currentTrack === 1 || currentTrack === 2) {
-          // Distância até o checkpoint atual
-          const distance = enemyCar.position.distanceTo(target);
-
-          // Raio para ativação
+          // Lógica original — segue em direção ao checkpoint atual, com detecção menor
+          direction = new THREE.Vector3().subVectors(target, enemyCar.position);
+          distance = direction.length();
           const detectionRadius = 8;
+          isInside = distance < detectionRadius;
+          wasInside = ai.insideCheckpoint[currentTrack];
 
-          // Se entrou no checkpoint neste quadro
-          if (distance < detectionRadius && !enemyInsideCheckpoint[currentTrack]) {
-              // Marca que entrou (para não repetir enquanto dentro)
-              enemyInsideCheckpoint[currentTrack] = true;
-
-              // Faz curva de 90° exceto no checkpoint 1 (índice 0)
-              if (idx !== 0) {
-                  // Pista 1: todas as curvas são para a direita
-                  // Pista 2: checkpoint 9 (penúltimo antes do último) vira para esquerda, outros para direita
-                  if (currentTrack === 1) {
-                      // Pista 1: sempre vira 90 graus à direita
-                      enemyTargetRotation[currentTrack] = enemyCar.rotation.y - Math.PI / 2;
-                  } else if (currentTrack === 2) {
-                      // Pista 2: checkpoint 9 (índice 4) vira para esquerda, outros para direita
-                      // Mesmo se adicionar mais checkpoints, o checkpoint 9 continua no índice 4
-                      if (idx === 4) {
-                          // Checkpoint 9: vira 90 graus à esquerda
-                          enemyTargetRotation[currentTrack] = enemyCar.rotation.y + Math.PI / 2;
-                      } else {
-                          // Outros checkpoints: vira 90 graus à direita
-                          enemyTargetRotation[currentTrack] = enemyCar.rotation.y - Math.PI / 2;
-                      }
-                  }
-              }
-
-              // Avança para o próximo checkpoint (usando módulo para voltar ao 0)
-              // Isso permite repetir a primeira volta 4 vezes iguais
+          if (isInside && !wasInside) {
               const nextIdx = (idx + 1) % checkpoints.length;
-              
-              // Se completou todos os checkpoints e voltou ao checkpoint 0, conta uma volta
+
               if (nextIdx === 0 && idx === checkpoints.length - 1) {
-                  enemyLapCount[currentTrack] = Math.min(enemyLapCount[currentTrack] + 1, MAX_LAPS);
-                  
-                  // Se completou 4 voltas e ainda não tem vencedor, adversário vence
-                  if (enemyLapCount[currentTrack] >= MAX_LAPS) {
-                      setEnemyWinner();
-                  }
+                  ai.lapCount[currentTrack] = Math.min(ai.lapCount[currentTrack] + 1, MAX_LAPS);
+                  if (ai.lapCount[currentTrack] >= MAX_LAPS) setEnemyWinner(enemyCar.userData.id);
               }
-              
-              enemyCheckpointIndex[currentTrack] = nextIdx;
-              
-              // Reseta o flag imediatamente para permitir detecção do próximo checkpoint
-              // Isso garante que funcione igual em todas as 4 voltas
-              enemyInsideCheckpoint[currentTrack] = false;
+
+              ai.checkpointIndex[currentTrack] = nextIdx;
+              ai.insideCheckpoint[currentTrack] = false;
+          } else if (isInside) {
+              ai.insideCheckpoint[currentTrack] = true;
+          } else {
+              ai.insideCheckpoint[currentTrack] = false;
           }
 
-          // Se saiu do raio, libera para detectar o próximo checkpoint
-          if (distance >= detectionRadius) {
-              enemyInsideCheckpoint[currentTrack] = false;
-          }
+          // Rotação suave em direção ao checkpoint (mesma que antes)
+          direction.normalize();
+          const targetRotation = Math.atan2(-direction.z, direction.x);
 
-          // Se está no primeiro checkpoint (índice 0), vai em direção a ele
-          // Depois disso, apenas anda para frente
-          if (idx === 0 && distance > detectionRadius) {
-              // Vai em direção ao primeiro checkpoint
-              direction = new THREE.Vector3().subVectors(target, enemyCar.position);
-              direction.normalize();
-              const targetRotation = Math.atan2(-direction.z, direction.x);
-              
-              let angleDiff = targetRotation - enemyCar.rotation.y;
-              
-              // Normaliza o ângulo
-              if (angleDiff > Math.PI) {
-                  angleDiff -= 2 * Math.PI;
-              } else if (angleDiff < -Math.PI) {
-                  angleDiff += 2 * Math.PI;
-              }
-              
-              // Rotação suave em direção ao checkpoint
-              const turnSpeed = THREE.MathUtils.degToRad(80);
-              const maxRotationStep = turnSpeed * delta;
-              const rotationStep = THREE.MathUtils.clamp(angleDiff, -maxRotationStep, maxRotationStep);
-              enemyCar.rotation.y += rotationStep;
-          } else if (enemyTargetRotation[currentTrack] !== null) {
-              // Se há uma curva pendente, executa gradualmente
-              const targetRot = enemyTargetRotation[currentTrack];
-              let angleDiff = targetRot - enemyCar.rotation.y;
-              
-              // Normaliza o ângulo para o intervalo [-PI, PI]
-              if (angleDiff > Math.PI) {
-                  angleDiff -= 2 * Math.PI;
-              } else if (angleDiff < -Math.PI) {
-                  angleDiff += 2 * Math.PI;
-              }
-              
-              // Velocidade de rotação para curva suave
-              const turnSpeed = THREE.MathUtils.degToRad(120); // graus por segundo
-              const maxRotationStep = turnSpeed * delta;
-              
-              // Limita a rotação
-              const rotationStep = THREE.MathUtils.clamp(angleDiff, -maxRotationStep, maxRotationStep);
-              enemyCar.rotation.y += rotationStep;
-              
-              // Se chegou ao ângulo alvo, limpa o target
-              if (Math.abs(angleDiff) < 0.01) {
-                  enemyCar.rotation.y = targetRot; // Garante precisão
-                  enemyTargetRotation[currentTrack] = null;
-              }
-          }
+          let angleDiff = targetRotation - enemyCar.rotation.y;
+          if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+          else if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+
+          const turnSpeed = THREE.MathUtils.degToRad(100);
+          const maxRotationStep = turnSpeed * delta;
+          const rotationStep = THREE.MathUtils.clamp(angleDiff, -maxRotationStep, maxRotationStep);
+          enemyCar.rotation.y += rotationStep;
           // Caso contrário, apenas anda para frente na direção atual
-      }
- else {
+      } else {
           // Para pista 3, segue normalmente em direção ao checkpoint
           direction = new THREE.Vector3().subVectors(target, enemyCar.position);
           distance = direction.length();
           const detectionRadius = 20;
           isInside = distance < detectionRadius;
-          wasInside = enemyInsideCheckpoint[currentTrack];
+          wasInside = ai.insideCheckpoint[currentTrack];
           
           // Se entrou no raio do checkpoint pela primeira vez → avança para o próximo
           if (isInside && !wasInside) {
@@ -356,20 +276,20 @@
               
               // Se completou todos os checkpoints e voltou ao checkpoint 0, conta uma volta
               if (nextIdx === 0 && idx === checkpoints.length - 1) {
-                  enemyLapCount[currentTrack] = Math.min(enemyLapCount[currentTrack] + 1, MAX_LAPS);
+                  ai.lapCount[currentTrack] = Math.min(ai.lapCount[currentTrack] + 1, MAX_LAPS);
                   
                   // Se completou 4 voltas e ainda não tem vencedor, adversário vence
-                  if (enemyLapCount[currentTrack] >= MAX_LAPS) {
-                      setEnemyWinner();
+                  if (ai.lapCount[currentTrack] >= MAX_LAPS) {
+                      setEnemyWinner(enemyCar.userData.id);
                   }
               }
               
-              enemyCheckpointIndex[currentTrack] = nextIdx;
-              enemyInsideCheckpoint[currentTrack] = false;
+              ai.checkpointIndex[currentTrack] = nextIdx;
+              ai.insideCheckpoint[currentTrack] = false;
           } else if (isInside) {
-              enemyInsideCheckpoint[currentTrack] = true;
+              ai.insideCheckpoint[currentTrack] = true;
           } else {
-              enemyInsideCheckpoint[currentTrack] = false;
+              ai.insideCheckpoint[currentTrack] = false;
           }
           
           // Calcula rotação em direção ao checkpoint
@@ -400,18 +320,15 @@
       const targetSpeed = enemySpeed;
       const currentSpeed = enemyCar.userData.speed || 0;
       const accel = enemyCar.userData.accel || 12.0;
-      
-      // Se a velocidade está abaixo da velocidade alvo, acelera
+
+      // Se a velocidade está abaixo da velocidade alvo, acelera (usa `accel`, que pode ter sido reduzida pela penalidade)
       if (currentSpeed < targetSpeed) {
-          // Acelera usando a aceleração definida
           const speedIncrease = accel * delta;
           enemyCar.userData.speed = Math.min(currentSpeed + speedIncrease, targetSpeed);
       } else if (currentSpeed > targetSpeed) {
-          // Se estiver acima (após colisão), reduz gradualmente
           const speedDiff = targetSpeed - currentSpeed;
           enemyCar.userData.speed = currentSpeed + speedDiff * delta * 3;
       } else {
-          // Mantém a velocidade alvo
           enemyCar.userData.speed = targetSpeed;
       }
       
@@ -424,12 +341,7 @@
       enemyCar.position.addScaledVector(forwardDir, enemyCar.userData.speed * delta);
       }
 
-      // ------------------------------------------------------------
-      // RESETAR IA QUANDO TROCAR DE PISTA
-      // ------------------------------------------------------------
-      export function resetEnemyAI() {
-      enemyTargetIndex1 = 0;
-      enemyTargetIndex2 = 0;
-      enemyTargetIndex3 = 0;
-      }
+    // ------------------------------------------------------------
+    // Nota: não há resets globais de IA — cada inimigo armazena seu próprio estado
+    // ------------------------------------------------------------
 
