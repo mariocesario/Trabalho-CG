@@ -37,7 +37,7 @@ import { Skybox } from './Texture.js';
 // SCENE
 // ------------------------------------------------------------
 export const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87CEEB);
+Skybox(scene);
 
 // ------------------------------------------------------------
 // MATERIALS
@@ -259,56 +259,52 @@ function checkVehicleCollision(vehicle, track) {
 
   const list = track === 1 ? barreirasTrack1 :
               track === 2 ? barreirasTrack2 :
-                             barreirasTrack3; // para pista 3
+                             barreirasTrack3;
 
   for (const { mesh, bb } of list) {
     bb.setFromObject(mesh);
 
     if (vehicleBB.intersectsBox(bb)) {
-      // ======= Detecção de penetração =======
+      // ======= Detecta sobreposição =======
       const overlapX = Math.min(vehicleBB.max.x, bb.max.x) - Math.max(vehicleBB.min.x, bb.min.x);
       const overlapZ = Math.min(vehicleBB.max.z, bb.max.z) - Math.max(vehicleBB.min.z, bb.min.z);
 
       let normal = new THREE.Vector3();
-      let correction = new THREE.Vector3();
-
       if (overlapX < overlapZ) {
         normal.set(vehicle.position.x > mesh.position.x ? 1 : -1, 0, 0);
-        correction.copy(normal).multiplyScalar(overlapX + 0.05);
       } else {
         normal.set(0, 0, vehicle.position.z > mesh.position.z ? 1 : -1);
-        correction.copy(normal).multiplyScalar(overlapZ + 0.05);
       }
 
-      // Corrige posição para evitar penetração
-      vehicle.position.add(correction);
+      // Corrige posição suavemente (com interpolação)
+      const correction = normal.clone().multiplyScalar(Math.min(overlapX, overlapZ) * 0.9);
+      vehicle.position.add(correction.multiplyScalar(1.4)); // menos agressivo
 
       // ======= Cálculo do ângulo e fator de desaceleração =======
-      const vehicleSpeed = vehicle.userData.speed !== undefined ? vehicle.userData.speed : 0;
+      const vehicleSpeed = vehicle.userData.speed || 0;
       const movementDir = vehicleDir.clone().multiplyScalar(Math.sign(vehicleSpeed) || 1);
-      const angleDeg = THREE.MathUtils.radToDeg(movementDir.angleTo(normal));
+      const angle = movementDir.angleTo(normal);
 
-      // Quanto mais frontal o impacto (ângulo > 90), maior a perda
-      let reductionRate = 0.02; // desaceleração base suave
-      if (angleDeg > 90) {
-        const factor = (angleDeg - 90) / 90; // 0 a 1
-        reductionRate += factor * 0.08; // até 0.1 total
-      }
+      // Reduz mais se o ângulo for frontal
+      const factor = Math.max(0, Math.min(1, (angle - Math.PI / 2) / (Math.PI / 2))); // 0..1
+      const reduction = 0.02 + factor * 0.05; // máximo 7% da velocidade
 
-      // ======= Redução gradual até zero =======
-      const currentSpeed = Math.abs(vehicleSpeed);
-      const newSpeed = Math.max(0, currentSpeed - reductionRate * currentSpeed * 5);
-      
+      // ======= Aplica deslize =======
+      // remove a componente perpendicular e mantém a paralela (deslizamento)
+      const slideDir = movementDir.clone().sub(normal.clone().multiplyScalar(movementDir.dot(normal)));
+      slideDir.normalize();
+
+      const newSpeed = Math.max(0, Math.abs(vehicleSpeed) * (1 - reduction));
       if (vehicle.userData.speed !== undefined) {
         vehicle.userData.speed = Math.sign(vehicleSpeed) * newSpeed;
-        // Parar totalmente se muito lento
-        if (Math.abs(vehicle.userData.speed) < 0.05) vehicle.userData.speed = 0;
       }
+
+      // Move levemente no sentido do deslize
+      vehicle.position.add(slideDir.multiplyScalar(newSpeed * 0.05));
 
       return true;
     }
   }
-
   return false;
 }
 
@@ -379,8 +375,6 @@ function checkCarToCarCollision(car1, car2) {
 // ------------------------------------------------------------
 function render() {
   keyboardUpdate();
-
-  Skybox(scene);
 
   const delta = clock.getDelta();
   updateCar(car, delta, moveDirection);

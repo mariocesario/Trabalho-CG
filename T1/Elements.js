@@ -116,10 +116,13 @@ export function criaArvore1()
     const folhasCSG = CSG.fromMesh(folha).union(CSG.fromMesh(folha2));
 
     var folhaarv = textureloader.load('../assets/textures/grass.jpg');
+    var troncoarv = textureloader.load('../assets/textures/wood.png');
     var folhaMaterial = new THREE.MeshLambertMaterial();
+    var troncoMaterial = new THREE.MeshLambertMaterial();
         folhaMaterial.map = folhaarv;
+        troncoMaterial.map = troncoarv;
     // === Converter novamente para Mesh (mantendo materiais distintos) ===
-    const troncoMesh = CSG.toMesh(troncoCSG, new THREE.Matrix4(), material);
+    const troncoMesh = CSG.toMesh(troncoCSG, new THREE.Matrix4(), troncoMaterial);
     const folhasMesh = CSG.toMesh(folhasCSG, new THREE.Matrix4(), folhaMaterial);
 
      // === Agrupar tronco + folhas ===
@@ -171,11 +174,14 @@ export function criaArvore2()
     const folhasCSG = CSG.fromMesh(folha).union(CSG.fromMesh(folha2));
 
     var folhaarv = textureloader.load('../assets/textures/grass.jpg');
+    var troncoarv = textureloader.load('../assets/textures/wood.png');
     var folhaMaterial = new THREE.MeshLambertMaterial();
+    var troncoMaterial = new THREE.MeshLambertMaterial();
         folhaMaterial.map = folhaarv;
+        troncoMaterial.map = troncoarv;
     // === Converter novamente para Mesh (mantendo materiais distintos) ===
-    const troncoMeshaux = CSG.toMesh(troncoCSGaux, new THREE.Matrix4(), material);
-    const troncoMesh = CSG.toMesh(troncoCSG, new THREE.Matrix4(), material);
+    const troncoMeshaux = CSG.toMesh(troncoCSGaux, new THREE.Matrix4(), troncoMaterial);
+    const troncoMesh = CSG.toMesh(troncoCSG, new THREE.Matrix4(), troncoMaterial);
     const folhasMesh = CSG.toMesh(folhasCSG, new THREE.Matrix4(), folhaMaterial);
 
      // === Agrupar tronco + folhas ===

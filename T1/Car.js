@@ -21,6 +21,15 @@ export const START_POS_TRACK3 = new THREE.Vector3(-40, 0.5, -90);
 export const START_ROT_TRACK3 = degreesToRadians(0);
 
 
+function shinyMaterial(color) {
+  return new THREE.MeshPhongMaterial({
+    color: color,
+    specular: 0xffffff,   // cor do brilho
+    shininess: 80,        // intensidade do brilho
+    reflectivity: 1,
+  });
+}
+
 // ------------------------------------------------------------
 // FUNÇÃO GENÉRICA DE CRIAÇÃO DO MODELO DO HOVERCRAFT
 // (usada tanto para o jogador quanto para o adversário)
@@ -31,9 +40,11 @@ export function buildHovercraft(baseMat, bodyMat, cabineMat, noseMat) {
   const geometry2 = new THREE.CylinderGeometry( 1.5, 1.5, 1.5, 14);
   const geometry3 = new THREE.BoxGeometry( 1.8, 0.5, 1.5);
   
-  const baseG = new THREE.Mesh(geometry, material);
-  const add =new THREE.Mesh(geometry2, material);
-  const add2 =new THREE.Mesh(geometry2, material);
+  const bodyMaterial = shinyMaterial(0xff0000);
+
+  const baseG = new THREE.Mesh(geometry, bodyMaterial);
+  const add =new THREE.Mesh(geometry2, bodyMaterial);
+  const add2 =new THREE.Mesh(geometry2,bodyMaterial);
   
   baseG.position.set(0, 0.75, 0);
   baseG.rotateX(THREE.MathUtils.degToRad(90));

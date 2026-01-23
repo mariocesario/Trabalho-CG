@@ -113,8 +113,8 @@ export function createSquareTrackElements(trackGroup, material) {
   p1.matrixAutoUpdate = p2.matrixAutoUpdate = false;
   p3.matrixAutoUpdate = p4.matrixAutoUpdate = false;
 
-  p1.matrix.identity().multiply(new THREE.Matrix4().makeTranslation(0, -0.1, 90)).multiply(rot);
-  p2.matrix.identity().multiply(new THREE.Matrix4().makeTranslation(0, -0.1, -90)).multiply(rot);
+  p1.matrix.identity().multiply(new THREE.Matrix4().makeTranslation(0, -0.15, 90)).multiply(rot);
+  p2.matrix.identity().multiply(new THREE.Matrix4().makeTranslation(0, -0.15, -90)).multiply(rot);
   p3.matrix.identity().multiply(new THREE.Matrix4().makeTranslation(-90, -0.1, 0)).multiply(rot);
   p4.matrix.identity().multiply(new THREE.Matrix4().makeTranslation(90, -0.1, 0)).multiply(rot);
 
@@ -135,11 +135,11 @@ export function createLTrackElements(trackGroup, material) {
 
   const segmentData = [
     { length: 200, isHorizontal: true, pos: new THREE.Vector3(0, 0, -90) },
-    { length: 180, isHorizontal: false, pos: new THREE.Vector3(90, 0, 10) },
+    { length: 180, isHorizontal: false, pos: new THREE.Vector3(90, -0.25, 10) },
     { length: 100, isHorizontal: true, pos: new THREE.Vector3(30, 0, 90) },
-    { length: 100, isHorizontal: false, pos: new THREE.Vector3(-10, 0, 30) },
+    { length: 100, isHorizontal: false, pos: new THREE.Vector3(-10, -0.25, 30) },
     { length: 80, isHorizontal: true, pos: new THREE.Vector3(-60, 0, -10) },
-    { length: 60, isHorizontal: false, pos: new THREE.Vector3(-90, 0, -50) },
+    { length: 60, isHorizontal: false, pos: new THREE.Vector3(-90, -0.25, -50) },
   ];
 
   let rot = new THREE.Matrix4().makeRotationX(degreesToRadians(-90));

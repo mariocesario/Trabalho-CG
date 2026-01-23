@@ -1,6 +1,6 @@
 // Walls.js
 import * as THREE from 'three';
-import {texturaTest} from './Texture.js';
+import {texturaBarreira} from './Texture.js';
 
 export const barreirasTrack1 = [];
 export const barreirasTrack2 = [];
@@ -18,7 +18,7 @@ function makeBlock(geom, pos, isRed) {
     color: isRed ? 0xff0000 : 0xffffff
   });
 
-  const mesh = new THREE.Mesh(geom, mat);
+  const mesh = texturaBarreira(geom);
   mesh.position.copy(pos);
   mesh.castShadow = true;
 

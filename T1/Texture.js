@@ -24,8 +24,8 @@ export function texturaAsfalto(geometria)
     var pistaMaterial = new THREE.MeshLambertMaterial();
     pistaMaterial.map = asfalto;
     var pista = new THREE.Mesh(geometria, pistaMaterial);
-    pista.material.map.repeat.x = 3;
-    pista.material.map.repeat.y = 3;
+    pista.material.map.repeat.x = 2;
+    pista.material.map.repeat.y = 2;
 
     return pista;
 }
@@ -42,23 +42,13 @@ export function texturaFolha(geometria)
     return plano;
 }
 
-export function texturaTronco(geometria)
-{
-    var textureloader = new THREE.TextureLoader();
-    var chao = textureloader.load('../assets/textures/grass.jpg');
-
-    var chaoMaterial = new THREE.MeshLambertMaterial();
-    chaoMaterial.map = chao;
-    var plano = new THREE.Mesh(geometria, chaoMaterial);
-
-    return plano;
-}
-
 export function Skybox(scene)
 {
+    const textureloader = new THREE.TextureLoader();
+    let textureEquirec = textureloader.load('../assets/textures/skybox/panorama1.jpg');
+    textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
     
-    let cubeMapTexture = new CubeTextureLoaderSingleFile().load('../assets/textures/skybox/canyonCross.jpg', 1);
-    scene.background = cubeMapTexture;
+    scene.background = textureEquirec;
 }
 
 export function texturaExterna(geometria,n)
@@ -82,4 +72,16 @@ export function texturaExterna(geometria,n)
     var area = new THREE.Mesh(geometria,areaEX);
 
     return area;
+}
+
+export function texturaBarreira(geometria)
+{
+    var textureloader = new THREE.TextureLoader();
+    var barreira = textureloader.load('../assets/textures/crate.jpg');
+
+    var barreiraMaterial = new THREE.MeshLambertMaterial();
+    barreiraMaterial.map = barreira;
+    var barrei = new THREE.Mesh(geometria, barreiraMaterial);
+
+    return barrei;
 }
