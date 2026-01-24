@@ -1,6 +1,4 @@
 import * as THREE from  'three';
-import {CubeTextureLoaderSingleFile} from '../libs/util/cubeTextureLoaderSingleFile.js';
-import { EqualStencilFunc } from '../build/three.core.js';
 
 export function texturaTest(geometria)
 {

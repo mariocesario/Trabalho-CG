@@ -198,7 +198,7 @@ export function resetCarPosition(car, trackNumber) {
 
 }
 
-
+//
 // ------------------------------------------------------------
 // MOVIMENTO DO CARRO DO JOGADOR
 // ------------------------------------------------------------
