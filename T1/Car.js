@@ -8,16 +8,13 @@ let material = setDefaultMaterial('rgba(189, 82, 32, 1)');
 // ------------------------------------------------------------
 // POSIÇÕES INICIAIS — 3 PISTAS
 // ------------------------------------------------------------
-export const START_POS_TRACK1 = new THREE.Vector3(-40, 0.5, -90);
+export const START_POS_TRACK1 = new THREE.Vector3(-40, 10.5, -90);
 export const START_ROT_TRACK1 = degreesToRadians(0);
 
-export const START_POS_TRACKcar2 = new THREE.Vector3(-40, 0.5, -95);
-export const START_ROT_TRACKcar2 = degreesToRadians(0);
-
-export const START_POS_TRACK2 = new THREE.Vector3(-40, 0.5, -90);
+export const START_POS_TRACK2 = new THREE.Vector3(-40, 10.5, -90);
 export const START_ROT_TRACK2 = degreesToRadians(0);
 
-export const START_POS_TRACK3 = new THREE.Vector3(-40, 0.5, -90);
+export const START_POS_TRACK3 = new THREE.Vector3(-40, 10.5, -90);
 export const START_ROT_TRACK3 = degreesToRadians(0);
 
 
@@ -76,6 +73,22 @@ export function buildHovercraft(baseMat, bodyMat, cabineMat, noseMat) {
   body.position.x = -1;
   craft.add(body);
 
+  const cabine = new THREE.Mesh(
+    new THREE.BoxGeometry(1.0, 0.5, 0.7),
+    cabineMat
+  );
+  cabine.position.set(0, 1.0, 0);
+  craft.add(cabine);
+
+  const nose = new THREE.Mesh(
+    new THREE.ConeGeometry(0.4, 1.0, 16),
+    noseMat
+  );
+  nose.rotation.z = Math.PI / 2;
+  nose.position.set(1.7, 0.35, 0);
+  nose.name = 'nose';
+  craft.add(nose);
+
   return craft;
 }
 
@@ -97,14 +110,20 @@ export function createCar(scene) {
 
   car.userData = {
     speed: 0,
+    health: 100,
+    maxShotsPerLap: 4,
+    shotsRemaining: 4,
     accel: 17.0,
     brake: 17.0,
     drag: 15,
     maxSpeed: 30,
     maxReverseSpeed: -30,
-    turnSpeed: THREE.MathUtils.degToRad(120)
+    turnSpeed: THREE.MathUtils.degToRad(120),
+    isPlayer: true
   };
   scene.add(car);
+  // garante campos para projéteis
+  car.userData.projectiles = [];
   return car;
 }
 
@@ -179,7 +198,8 @@ export function resetCarPosition(car,enemy, trackNumber) {
     newPoscar2 = START_POS_TRACKcar2;
     newRotcar2 = START_ROT_TRACKcar2;
   }
-  car.position.copy(newPos);
+  // posiciona o carro 0.2 acima do topo da pista (subiu +0.1 adicional)
+  car.position.set(newPos.x, newPos.y - 0.4, newPos.z);
   car.rotation.y = newRot;
   car.userData.speed = 0;
   enemy.position.copy(newPoscar2);
@@ -194,7 +214,7 @@ export function resetCarPosition(car,enemy, trackNumber) {
 export function updateCar(car, delta, moveDirection) {
   const carData = car.userData;
 
-  // Acelerar
+  // Acelerar (mesmo quando penalizado — `accel` pode ter sido reduzido pela penalidade)
   if (moveDirection.forward)
     carData.speed += carData.accel * delta;
   else if ((carData.speed - carData.drag * delta) >= 0)
@@ -228,3 +248,9 @@ function updateObject(mesh)
    mesh.matrixAutoUpdate = false;
    mesh.updateMatrix();
 }
+
+
+// ------------------------------------------------------------
+// TIRO — cria e atualiza projéteis atirados a partir do nariz
+// ------------------------------------------------------------
+// NOTE: funções de tiro movidas para T1/Shoot.js
