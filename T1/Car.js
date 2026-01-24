@@ -175,36 +175,27 @@ export function createEnemyCar(scene) {
 // ------------------------------------------------------------
 // RESET DO CARRO POR PISTA
 // ------------------------------------------------------------
-export function resetCarPosition(car,enemy, trackNumber) {
-  let newPos, newRot, newPoscar2, newRotcar2;
+export function resetCarPosition(car, trackNumber) {
+  let newPos, newRot;
   if (trackNumber === 1) {
     newPos = START_POS_TRACK1;
     newRot = START_ROT_TRACK1;
-    newPoscar2 = START_POS_TRACKcar2;
-    newRotcar2 = START_ROT_TRACKcar2;
   } else if (trackNumber === 2) {
     newPos = START_POS_TRACK2;
     newRot = START_ROT_TRACK2;
-    newPoscar2 = START_POS_TRACKcar2;
-    newRotcar2 = START_ROT_TRACKcar2;
   } else if (trackNumber === 3) {
     newPos = START_POS_TRACK3;
     newRot = START_ROT_TRACK3;
-    newPoscar2 = START_POS_TRACKcar2;
-    newRotcar2 = START_ROT_TRACKcar2;
   } else {
     newPos = START_POS_TRACK1;
     newRot = START_ROT_TRACK1;
-    newPoscar2 = START_POS_TRACKcar2;
-    newRotcar2 = START_ROT_TRACKcar2;
   }
   // posiciona o carro 0.2 acima do topo da pista (subiu +0.1 adicional)
   car.position.set(newPos.x, newPos.y - 0.4, newPos.z);
   car.rotation.y = newRot;
   car.userData.speed = 0;
-  enemy.position.copy(newPoscar2);
-  enemy.rotation.y = newRotcar2;
-  enemy.userData.speed = 0;
+  
+
 }
 
 

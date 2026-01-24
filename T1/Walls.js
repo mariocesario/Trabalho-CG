@@ -1,6 +1,7 @@
 // Walls.js
 import * as THREE from 'three';
 import { START_POS_TRACK1, START_POS_TRACK2, START_POS_TRACK3 } from './Car.js';
+import { texturaBarreira } from './Texture.js';
 
 export const barreirasTrack1 = [];
 export const barreirasTrack2 = [];
