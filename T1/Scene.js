@@ -538,16 +538,21 @@ function keyboardUpdate() {
 // Função genérica para verificar colisão de qualquer veículo
 function checkVehicleCollision(vehicle, track) {
   const vehicleBB = new THREE.Box3().setFromObject(vehicle);
-  const vehicleDir = new THREE.Vector3(Math.cos(vehicle.rotation.y), 0, -Math.sin(vehicle.rotation.y));
+  const vehicleDir = new THREE.Vector3(
+    Math.cos(vehicle.rotation.y),
+    0,
+    -Math.sin(vehicle.rotation.y)
+  );
 
   const list = track === 1 ? barreirasTrack1 :
-              track === 2 ? barreirasTrack2 :
-                             barreirasTrack3;
+               track === 2 ? barreirasTrack2 :
+                              barreirasTrack3;
 
   for (const { mesh, bb } of list) {
     bb.setFromObject(mesh);
 
     if (vehicleBB.intersectsBox(bb)) {
+
       // ======= Detecta sobreposição =======
       const overlapX = Math.min(vehicleBB.max.x, bb.max.x) - Math.max(vehicleBB.min.x, bb.min.x);
       const overlapZ = Math.min(vehicleBB.max.z, bb.max.z) - Math.max(vehicleBB.min.z, bb.min.z);
@@ -559,35 +564,53 @@ function checkVehicleCollision(vehicle, track) {
         normal.set(0, 0, vehicle.position.z > mesh.position.z ? 1 : -1);
       }
 
-      // Corrige posição suavemente (com interpolação)
-      const correction = normal.clone().multiplyScalar(Math.min(overlapX, overlapZ) * 0.5);
-      vehicle.position.add(correction.multiplyScalar(2.8)); // menos agressivo
+      // ======= Correção suave de posição =======
+      const correction = normal.clone().multiplyScalar(Math.min(overlapX, overlapZ) * 0.4);
+      vehicle.position.add(correction);
 
-      // ======= Cálculo do ângulo e fator de desaceleração =======
+      // ======= Velocidade e direção =======
       const vehicleSpeed = vehicle.userData.speed || 0;
-      const movementDir = vehicleDir.clone().multiplyScalar(Math.sign(vehicleSpeed) || 1);
-      const angle = movementDir.angleTo(normal);
+      if (vehicleSpeed === 0) return true;
 
-      // Reduz mais se o ângulo for frontal
-      const factor = Math.max(0, Math.min(1, (angle - Math.PI / 2) / (Math.PI / 2))); // 0..1
-      const reduction = 0.02 + factor * 0.05; // máximo 7% da velocidade
+      const movementDir = vehicleDir.clone()
+        .multiplyScalar(Math.sign(vehicleSpeed))
+        .normalize();
 
-      // ======= Aplica deslize =======
-      // remove a componente perpendicular e mantém a paralela (deslizamento)
-      const slideDir = movementDir.clone().sub(normal.clone().multiplyScalar(movementDir.dot(normal)));
-      slideDir.normalize();
+      // ======= Ângulo de impacto =======
+      const angleRad = movementDir.angleTo(normal);
+      const angleDeg = THREE.MathUtils.radToDeg(angleRad);
 
-      const newSpeed = Math.max(0, Math.abs(vehicleSpeed) * (1 - reduction));
-      if (vehicle.userData.speed !== undefined) {
-        vehicle.userData.speed = Math.sign(vehicleSpeed) * newSpeed;
+      // ======= FATOR ANGULAR SUAVIZADO =======
+      // até 45° -> praticamente só desliza
+      let angleFactor = 0;
+      if (angleDeg > 45) {
+        angleFactor = (angleDeg - 45) / 45; // 0..1
+        angleFactor = THREE.MathUtils.clamp(angleFactor, 0, 1);
+        angleFactor *= angleFactor; // curva quadrática (mais suave)
       }
 
-      // Move levemente no sentido do deslize
+      // ======= REDUÇÃO PROGRESSIVA =======
+      const baseReduction = 0.005;      // atrito mínimo lateral
+      const frontalReduction = 0.10;    // impacto frontal forte
+      const reduction = baseReduction + angleFactor * frontalReduction;
+
+      let newSpeed = Math.abs(vehicleSpeed) * (1 - reduction);
+
+      if (newSpeed < 0.02) newSpeed = 0;
+      vehicle.userData.speed = Math.sign(vehicleSpeed) * newSpeed;
+
+      // ======= DESLIZE (original preservado) =======
+      const slideDir = movementDir.clone()
+        .sub(normal.clone().multiplyScalar(movementDir.dot(normal)));
+
+      if (slideDir.lengthSq() > 0) slideDir.normalize();
+
       vehicle.position.add(slideDir.multiplyScalar(newSpeed * 0.05));
 
       return true;
     }
   }
+
   return false;
 }
 
