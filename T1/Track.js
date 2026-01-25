@@ -183,10 +183,11 @@ export function createLTrackElements(trackGroup, material) {
       const waterWidth = 70;
       const waterGeometry = new THREE.PlaneGeometry(waterWidth, trackWidth);
       const textureLoader = new THREE.TextureLoader();
+      const waterNormals = textureLoader.load('../assets/textures/NormalMapping/waternormals.jpg', function(t){ t.wrapS = t.wrapT = THREE.RepeatWrapping; });
       const water = new Water(waterGeometry, {
         textureWidth: 512,
         textureHeight: 512,
-        waterNormals: textureLoader.load('../assets/textures/NormalMapping/waternormals.jpg', function(t){ t.wrapS = t.wrapT = THREE.RepeatWrapping; }),
+        waterNormals: waterNormals,
         sunDirection: new THREE.Vector3(),
         sunColor: 0xffffff,
         waterColor: 0x001e0f,
@@ -212,11 +213,12 @@ export function createFourQuadrantTrack(trackGroup, material) {
 
   const segmentData = [
     { length: 100, isHorizontal: true, pos: new THREE.Vector3(-40, -0.1, -90) },
-    { length: 200, isHorizontal: false, pos: new THREE.Vector3(0, -0.15, 0) },
-    { length: 180, isHorizontal: true, pos: new THREE.Vector3(0, -0.1, 10) },
-    { length: 60, isHorizontal: false, pos: new THREE.Vector3(80,  -0.15, 50) },
+    { length: 200, isHorizontal: false, pos: new THREE.Vector3(0, -0.1, 0) },
+    { length: 130, isHorizontal: true, pos: new THREE.Vector3(25, -0.1, 10) },
+    { length: 40, isHorizontal: true, pos: new THREE.Vector3(-70, -0.1, 10) },
+    { length: 60, isHorizontal: false, pos: new THREE.Vector3(80, -0.1, 50) },
     { length: 100, isHorizontal: true, pos: new THREE.Vector3(40, -0.1, 90) },
-    { length: 80, isHorizontal: false, pos: new THREE.Vector3(-80,  -0.15, -40) },
+    { length: 80, isHorizontal: false, pos: new THREE.Vector3(-80, -0.1, -40) },
   ];
 
   let rot = new THREE.Matrix4().makeRotationX(degreesToRadians(-90));
@@ -242,8 +244,8 @@ export function createFourQuadrantTrack(trackGroup, material) {
       const z1 = s.pos.z + (half1 / 2);
 
       // cria a jump platform central — ocupa no máximo 50% da largura da pista
-      const platformWidth = Math.min(trackWidth / 2, 10); // <= 50% da largura
-      const platformLength = 10;
+      const platformWidth = Math.min(trackWidth / 2, 5); // <= 50% da largura
+      const platformLength = 5;
       const platformMat = material.clone ? material.clone() : material;
       // dar uma cor ligeiramente diferente para visualizar
       try { platformMat.color = new THREE.Color(0x3333aa); } catch(e) {}
@@ -251,7 +253,7 @@ export function createFourQuadrantTrack(trackGroup, material) {
       // posiciona a plataforma ANTES do buraco (lado de aproximação – borda da metade superior)
       const zInner = s.pos.z + (gapLength / 2); // coordenada da borda interna próxima ao gap
       // posiciona a plataforma explicitamente conforme pedido: z = -10, y = 10.25
-      platform.position.set(s.pos.x, 10.25, -10);
+      platform.position.set(-35, 10.25, 10);
       // marca a plataforma para ser detectada pela cena e configura parâmetros de pulo
       platform.name = 'jumpPlatform';
       platform.userData = platform.userData || {};

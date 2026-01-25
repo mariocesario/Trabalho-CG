@@ -1,85 +1,67 @@
-import * as THREE from  'three';
+import * as THREE from 'three';
 
-export function texturaTest(geometria)
-{
-    var textureloader = new THREE.TextureLoader();
-    var stone = textureloader.load('../assets/textures/stone.jpg');
+// TextureLoader compartilhado e cache de texturas
+const textureLoader = new THREE.TextureLoader();
+const textureCache = new Map();
+const materialCache = new Map();
 
-    var cubeMaterial = new THREE.MeshLambertMaterial();
-    cubeMaterial.map = stone;
-    var cube = new THREE.Mesh(geometria, cubeMaterial);
-
-    return cube;
+function getTexture(path) {
+  if (textureCache.has(path)) {
+    return textureCache.get(path);
+  }
+  const texture = textureLoader.load(path);
+  textureCache.set(path, texture);
+  return texture;
 }
 
-export function texturaAsfalto(geometria)
-{
-    var textureloader = new THREE.TextureLoader();
-    var asfalto = textureloader.load('../assets/textures/asfalto.jpg');
-    asfalto.wrapS = THREE.RepeatWrapping;
-    asfalto.wrapT = THREE.RepeatWrapping;
-
-    var pistaMaterial = new THREE.MeshLambertMaterial();
-    pistaMaterial.map = asfalto;
-    var pista = new THREE.Mesh(geometria, pistaMaterial);
-    pista.material.map.repeat.x = 2;
-    pista.material.map.repeat.y = 2;
-
-    return pista;
+function getMaterial(texturePath, materialType = THREE.MeshLambertMaterial) {
+  const key = `${texturePath}_${materialType.name}`;
+  if (materialCache.has(key)) {
+    return materialCache.get(key);
+  }
+  const texture = getTexture(texturePath);
+  const material = new materialType({ map: texture });
+  materialCache.set(key, material);
+  return material;
 }
 
-export function texturaFolha(geometria)
-{
-    var textureloader = new THREE.TextureLoader();
-    var chao = textureloader.load('../assets/textures/grass.jpg');
+export function texturaAsfalto(geometria) {
+  const asfalto = getTexture('../assets/textures/asfalto.jpg');
+  asfalto.wrapS = THREE.RepeatWrapping;
+  asfalto.wrapT = THREE.RepeatWrapping;
+  asfalto.repeat.x = 2;
+  asfalto.repeat.y = 2;
 
-    var chaoMaterial = new THREE.MeshLambertMaterial();
-    chaoMaterial.map = chao;
-    var plano = new THREE.Mesh(geometria, chaoMaterial);
-
-    return plano;
+  const pistaMaterial = new THREE.MeshLambertMaterial({ map: asfalto });
+  return new THREE.Mesh(geometria, pistaMaterial);
 }
 
-export function Skybox(scene)
-{
-    const textureloader = new THREE.TextureLoader();
-    let textureEquirec = textureloader.load('../assets/textures/skybox/panorama1.jpg');
-    textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
-    
-    scene.background = textureEquirec;
+export function texturaFolha(geometria) {
+  const material = getMaterial('../assets/textures/grass.jpg');
+  return new THREE.Mesh(geometria, material);
 }
 
-export function texturaExterna(geometria,n)
-{
-    var textureloader = new THREE.TextureLoader();
-    if(n == 1)
-    {
-        var areaExter =textureloader.load('../assets/textures/grass.jpg');
-    }
-    else if(n== 2)
-    {
-        var areaExter =textureloader.load('../assets/textures/sand.jpg');
-    }
-    else
-    {
-        var areaExter =textureloader.load('../assets/textures/cement.jpg');
-    }
-
-    var areaEX = new THREE.MeshLambertMaterial();
-    areaEX.map = areaExter;
-    var area = new THREE.Mesh(geometria,areaEX);
-
-    return area;
+export function Skybox(scene) {
+  const textureEquirec = getTexture('../assets/textures/skybox/panorama1.jpg');
+  textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
+  scene.background = textureEquirec;
 }
 
-export function texturaBarreira(geometria)
-{
-    var textureloader = new THREE.TextureLoader();
-    var barreira = textureloader.load('../assets/textures/crate.jpg');
+export function texturaExterna(geometria, n) {
+  let texturePath;
+  if (n == 1) {
+    texturePath = '../assets/textures/grass.jpg';
+  } else if (n == 2) {
+    texturePath = '../assets/textures/sand.jpg';
+  } else {
+    texturePath = '../assets/textures/cement.jpg';
+  }
 
-    var barreiraMaterial = new THREE.MeshLambertMaterial();
-    barreiraMaterial.map = barreira;
-    var barrei = new THREE.Mesh(geometria, barreiraMaterial);
+  const material = getMaterial(texturePath);
+  return new THREE.Mesh(geometria, material);
+}
 
-    return barrei;
+export function texturaBarreira(geometria) {
+  const material = getMaterial('../assets/textures/crate.jpg');
+  return new THREE.Mesh(geometria, material);
 }

@@ -4,7 +4,6 @@ import { START_POS_TRACK1, START_POS_TRACK2, START_POS_TRACK3 } from './Car.js';
 
 // contador de voltas e limite
 export let lapCount = 0;
-export let lapCountEnemy = 0;
 export const MAX_LAPS = 4;
 // debug flag para logs do sistema de voltas
 export let LAP_DEBUG = false;
@@ -83,7 +82,6 @@ let gameOver = false;
 // ============================================================
 export function resetLapSystem() {
   lapCount = 0;
-  lapCountEnemy = 0;
   gameOver = false;
   winner = null;
   winnerId = null;
