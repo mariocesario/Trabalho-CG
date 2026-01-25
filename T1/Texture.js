@@ -83,3 +83,29 @@ export function texturaBarreira(geometria)
 
     return barrei;
 }
+export function texturaPistaElevada(geometria)
+{
+    let geoMaterials = [
+        setMaterial('../assets/textures/stone.jpg'),
+        setMaterial('../assets/textures/stone.jpg'),
+        setMaterial('../assets/textures/asfalto.jpg'),
+        setMaterial('../assets/textures/stone.jpg'),
+        setMaterial('../assets/textures/stone.jpg'),
+        setMaterial('../assets/textures/stone.jpg')
+    ];
+
+    let pista = new THREE.Mesh(geometria, geoMaterials);
+
+    return pista;
+}
+
+
+function setMaterial(file, repeatU = 1, repeatV = 1, color = 'rgb(255,255,255)'){
+    let loader = new THREE.TextureLoader();
+   let mat = new THREE.MeshBasicMaterial({ map: loader.load(file), color:color});
+      mat.map.colorSpace = THREE.SRGBColorSpace;
+   mat.map.wrapS = mat.map.wrapT = THREE.RepeatWrapping;
+   mat.map.minFilter = mat.map.magFilter = THREE.LinearFilter;
+   mat.map.repeat.set(repeatU,repeatV); 
+   return mat;
+}

@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import KeyboardState from '../libs/util/KeyboardState.js';
 import { criaArvoresQuadrado, criaArvoresL, criaArvoresQuatroQuadrantes, criaTunel } from './Elements.js';
 import { initRenderer } from './Renderer.js';
-import { initLight, updateLightFollow } from './Light.js';
+import { initLight} from './Light.js';
 import {
   setDefaultMaterial,
   InfoBox,
@@ -94,7 +94,7 @@ function setInitialFormation(trackNumber = 1) {
 // Criação da iluminação e renderer
 // ------------------------------------------------------
 
-const dirLight = initLight(scene, car);
+const {dirLight, updateLightFollow } = initLight(scene, car);
 export const renderer = initRenderer();
 
 // ------------------------------------------------------------
@@ -560,8 +560,8 @@ function checkVehicleCollision(vehicle, track) {
       }
 
       // Corrige posição suavemente (com interpolação)
-      const correction = normal.clone().multiplyScalar(Math.min(overlapX, overlapZ) * 0.9);
-      vehicle.position.add(correction.multiplyScalar(1.4)); // menos agressivo
+      const correction = normal.clone().multiplyScalar(Math.min(overlapX, overlapZ) * 0.5);
+      vehicle.position.add(correction.multiplyScalar(2.8)); // menos agressivo
 
       // ======= Cálculo do ângulo e fator de desaceleração =======
       const vehicleSpeed = vehicle.userData.speed || 0;
@@ -736,7 +736,7 @@ function render() {
   updateCar(car, delta, moveDirection);
   enemies.forEach(enemy => { if (!enemy.userData || enemy.userData.disabled) return; updateEnemyCar(enemy, delta, currentTrack); });
   updateCameraFollow(camera, car, moveDirection);
-  updateLightFollow(car, dirLight);
+  updateLightFollow();
 
   // atualiza efeitos da água (spray) — Track.js exporta updateWaterEffects
   updateWaterEffects(scene, car, delta);

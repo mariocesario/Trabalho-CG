@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { degreesToRadians } from "../libs/util/util.js";
 import { START_POS_TRACK1, START_POS_TRACK2, START_POS_TRACK3 } from './Car.js';
 import { Water } from '../build/jsm/objects/Water.js';
-import { texturaAsfalto } from './Texture.js';
+import { texturaPistaElevada } from './Texture.js';
 
 export let track1 = null;
 export let track2 = null;
@@ -133,10 +133,10 @@ export function createSquareTrackElements(trackGroup, material) {
   const thickness = Math.max(0.1, track1PlaneY + 0.1); // thickness to fill down toward ground
   const centerY = track1PlaneY - thickness / 2;
 
-  const box1 = new THREE.Mesh(new THREE.BoxGeometry(200, thickness, trackWidth), material);
-  const box2 = new THREE.Mesh(new THREE.BoxGeometry(200, thickness, trackWidth), material);
-  const box3 = new THREE.Mesh(new THREE.BoxGeometry(trackWidth, thickness, 200), material);
-  const box4 = new THREE.Mesh(new THREE.BoxGeometry(trackWidth, thickness, 200), material);
+  const box1 = texturaPistaElevada(new THREE.BoxGeometry(200, thickness, trackWidth));
+  const box2 = texturaPistaElevada(new THREE.BoxGeometry(200, thickness, trackWidth));
+  const box3 = texturaPistaElevada(new THREE.BoxGeometry(trackWidth, thickness, 200));
+  const box4 = texturaPistaElevada(new THREE.BoxGeometry(trackWidth, thickness, 200));
 
   box1.position.set(0, centerY, 90);
   box2.position.set(0, centerY, -90);
@@ -171,9 +171,9 @@ export function createLTrackElements(trackGroup, material) {
     let mesh;
     if (s.isHorizontal) {
       horizontalCount++;
-      mesh = new THREE.Mesh(new THREE.BoxGeometry(s.length, thickness, trackWidth), material);
+      mesh = texturaPistaElevada(new THREE.BoxGeometry(s.length, thickness, trackWidth));
     } else {
-      mesh = new THREE.Mesh(new THREE.BoxGeometry(trackWidth, thickness, s.length), material);
+      mesh = texturaPistaElevada(new THREE.BoxGeometry(trackWidth, thickness, s.length));
     }
     mesh.position.set(s.pos.x, centerY + s.pos.y, s.pos.z);
     mesh.receiveShadow = true;
@@ -233,7 +233,7 @@ export function createFourQuadrantTrack(trackGroup, material) {
     if (isGapSegment) {
       // não removemos o bloco da pista — criamos a reta completa (sem buraco)
       const gapLength = 0; // sem lacuna
-      const meshFull = new THREE.Mesh(new THREE.BoxGeometry(trackWidth, thickness3, s.length), material);
+      const meshFull = texturaPistaElevada(new THREE.BoxGeometry(trackWidth, thickness3, s.length));
       meshFull.position.set(s.pos.x, centerY3, s.pos.z);
       meshFull.receiveShadow = true;
       trackGroup.add(meshFull);
@@ -277,9 +277,9 @@ export function createFourQuadrantTrack(trackGroup, material) {
       return; // passou pela criação especial (saída do callback forEach)
     }
     if (s.isHorizontal) {
-      mesh = new THREE.Mesh(new THREE.BoxGeometry(s.length, thickness3, trackWidth), material);
+      mesh = texturaPistaElevada(new THREE.BoxGeometry(s.length, thickness3, trackWidth));
     } else {
-      mesh = new THREE.Mesh(new THREE.BoxGeometry(trackWidth, thickness3, s.length), material);
+      mesh = texturaPistaElevada(new THREE.BoxGeometry(trackWidth, thickness3, s.length));
     }
     mesh.position.set(s.pos.x, centerY3, s.pos.z);
     mesh.receiveShadow = true;
