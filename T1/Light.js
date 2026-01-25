@@ -23,24 +23,41 @@ export function initLight(scene, car) {
         car.position.z + dz
     );
 
-    let dirLight = new THREE.DirectionalLight(lightColor, 1);
-    dirLight.position.copy(lightPosition);
-    dirLight.castShadow = true;
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+  dirLight.position.set(50, 80, 40);
+  dirLight.castShadow = true;
 
-    dirLight.shadow.mapSize.width = 2048;  
-    dirLight.shadow.mapSize.height = 2048;
-    dirLight.shadow.camera.left = -120;
-    dirLight.shadow.camera.right = 120;
-    dirLight.shadow.camera.top = 120;
-    dirLight.shadow.camera.bottom = -120;
-    dirLight.shadow.camera.near = 1;
-    dirLight.shadow.camera.far = 300;
+  // === Parâmetros de sombra ===
+  dirLight.shadow.mapSize.width = 4096;
+  dirLight.shadow.mapSize.height = 4096;
 
-    scene.add(dirLight);
-    return dirLight;
+  const d = 120;
+  dirLight.shadow.camera.left = -d;
+  dirLight.shadow.camera.right = d;
+  dirLight.shadow.camera.top = d;
+  dirLight.shadow.camera.bottom = -d;
+  dirLight.shadow.camera.near = 0.5;
+  dirLight.shadow.camera.far = 500;
+
+  dirLight.shadow.bias = -0.0005;
+  dirLight.shadow.normalBias = 0.02;
+
+  scene.add(dirLight);
+
+  // === Luz ambiente ===
+  const ambient = new THREE.AmbientLight(0x404040, 0.5);
+  scene.add(ambient);
+
+  // === Atualização (segue o carro sem rotacionar) ===
+  function updateLightFollow() {
+    dirLight.position.x = car.position.x + 50;
+    dirLight.position.z = car.position.z + 40;
+  }
+
+  return { dirLight, updateLightFollow };
 }
 
-export function updateLightFollow(car, dirLight) {
+/*export function updateLightFollow(car, dirLight) {
   // Ângulo de inclinação (em graus)
   const angleDeg = -70;
   const angleRad = THREE.MathUtils.degToRad(angleDeg);
@@ -66,4 +83,4 @@ export function updateLightFollow(car, dirLight) {
   // Luz sempre aponta para o carro (target)
   dirLight.target.position.copy(car.position);
   dirLight.target.updateMatrixWorld();
-}
+}*/
