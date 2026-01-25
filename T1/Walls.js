@@ -12,13 +12,9 @@ export const groupLWalls      = new THREE.Group();
 export const groupThirdWalls  = new THREE.Group(); // <<< grupo da pista 3
 
 /**
- * Cria bloco branco/vermelho com bounding box
+ * Cria bloco com bounding box
  */
 function makeBlock(geom, pos, isRed) {
-  const mat = new THREE.MeshBasicMaterial({
-    color: isRed ? 0xff0000 : 0xffffff
-  });
-
   const mesh = texturaBarreira(geom);
   mesh.position.copy(pos);
   mesh.castShadow = true;
@@ -217,7 +213,6 @@ export function createThirdWalls(scene) {
     const isRed = i % 2 === 0;
     addBlock(new THREE.BoxGeometry(10, 2.5, 1), new THREE.Vector3(-65 + i * 10, barrierCenterY3, -80.5), isRed);
     addBlock(new THREE.BoxGeometry(10, 2.5, 1), new THREE.Vector3(15.5 + i * 10, barrierCenterY3, 19.5), isRed);
-    addBlock(new THREE.BoxGeometry(10, 2.5, 1), new THREE.Vector3(-65 + i * 10, barrierCenterY3, -0.5), isRed);
     addBlock(new THREE.BoxGeometry(10, 2.5, 1), new THREE.Vector3(65 - i * 10, barrierCenterY3, 80.5), isRed);
     addBlock(new THREE.BoxGeometry(1, 2.5, 10), new THREE.Vector3(10, barrierCenterY3, 75 - i * 10), isRed);
     addBlock(new THREE.BoxGeometry(1, 2.5, 10), new THREE.Vector3(70.5, barrierCenterY3, 25 + i * 10), isRed);
@@ -225,16 +220,29 @@ export function createThirdWalls(scene) {
 
   for (let i = 0; i < 8; i++) {
     const isRed = i % 2 === 0;
-    addBlock(new THREE.BoxGeometry(10, 2.5, 1), new THREE.Vector3(-85 + i * 10, barrierCenterY3, 20.5), isRed);
+
     addBlock(new THREE.BoxGeometry(1, 2.5, 10), new THREE.Vector3(-10.5, barrierCenterY3, 95 - i * 10), isRed);
     addBlock(new THREE.BoxGeometry(1, 2.5, 10), new THREE.Vector3(-70.5, barrierCenterY3, -75 + i * 10), isRed);
     addBlock(new THREE.BoxGeometry(1, 2.5, 10), new THREE.Vector3(-10.5, barrierCenterY3, -75 + i * 10), isRed);
     addBlock(new THREE.BoxGeometry(10, 2.5, 1), new THREE.Vector3(15.5 + i * 10, barrierCenterY3, -0.5), isRed);
   }
 
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < 2; i++) {
     const isRed = i % 2 === 1;
-    // (padrão)
+     addBlock(new THREE.BoxGeometry(1, 2.5, 10), new THREE.Vector3(-50, barrierCenterY3, 15 - i * 10), isRed);
+     addBlock(new THREE.BoxGeometry(1, 2.5, 10), new THREE.Vector3(-40, barrierCenterY3, 15 - i * 10), isRed);
+      addBlock(new THREE.BoxGeometry(10, 2.5, 1), new THREE.Vector3(-65 + i * 10, barrierCenterY3, -0.5), isRed);
+    
+    }
+  for (let i = 0; i < 3; i++) {
+    const isRed = i % 2 === 1;
+  addBlock(new THREE.BoxGeometry(10, 2.5, 1), new THREE.Vector3(-35 + i * 10, barrierCenterY3, -0.5), isRed);
+  addBlock(new THREE.BoxGeometry(10, 2.5, 1), new THREE.Vector3(-35 + i * 10, barrierCenterY3, 19.5), isRed);
+  addBlock(new THREE.BoxGeometry(10, 2.5, 1), new THREE.Vector3(-85 + i * 10, barrierCenterY3, 19.5), isRed);
+  }
+   for (let i = 0; i < 4; i++) {
+    const isRed = i % 2 === 1;
+  addBlock(new THREE.BoxGeometry(10, 2.5, 1), new THREE.Vector3(-85 + i * 10, barrierCenterY3, 19.5), isRed);
   }
 
   if (scene) scene.add(groupThirdWalls);

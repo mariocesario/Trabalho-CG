@@ -1,10 +1,8 @@
 // Car.js
 import * as THREE from 'three';
-    import { CSG } from '../libs/other/CSGMesh.js';
+import { CSG } from '../libs/other/CSGMesh.js';
 import { setDefaultMaterial, degreesToRadians } from "../libs/util/util.js";
 
-
-let material = setDefaultMaterial('rgba(189, 82, 32, 1)');
 // ------------------------------------------------------------
 // POSIÇÕES INICIAIS — 3 PISTAS
 // ------------------------------------------------------------
@@ -17,60 +15,26 @@ export const START_ROT_TRACK2 = degreesToRadians(0);
 export const START_POS_TRACK3 = new THREE.Vector3(-40, 10.5, -90);
 export const START_ROT_TRACK3 = degreesToRadians(0);
 
-
-function shinyMaterial(color) {
-  return new THREE.MeshPhongMaterial({
-    color: color,
-    specular: 0xffffff,   // cor do brilho
-    shininess: 80,        // intensidade do brilho
-    reflectivity: 1,
-  });
-}
-
 // ------------------------------------------------------------
 // FUNÇÃO GENÉRICA DE CRIAÇÃO DO MODELO DO HOVERCRAFT
 // (usada tanto para o jogador quanto para o adversário)
 // ------------------------------------------------------------
-export function buildHovercraft(baseMat, bodyMat, cabineMat, noseMat) {
-
-  const geometry = new THREE.BoxGeometry( 4, 3, 1.5 );
-  const geometry2 = new THREE.CylinderGeometry( 1.5, 1.5, 1.5, 14);
-  const geometry3 = new THREE.BoxGeometry( 1.8, 0.5, 1.5);
-  
-  const bodyMaterial = shinyMaterial(0xff0000);
-
-  const baseG = new THREE.Mesh(geometry, bodyMaterial);
-  const add =new THREE.Mesh(geometry2, bodyMaterial);
-  const add2 =new THREE.Mesh(geometry2,bodyMaterial);
-  
-  baseG.position.set(0, 0.75, 0);
-  baseG.rotateX(THREE.MathUtils.degToRad(90));
-  updateObject(baseG);
-  add.position.set(2, 0.75, 0);
-  updateObject(add);
-  add2.position.set(-2, 0.75, 0);
-  updateObject(add2);
-  
-  let baseCSG = CSG.fromMesh(baseG);
-  baseCSG =baseCSG.union(CSG.fromMesh(add));
-  baseCSG =baseCSG.union(CSG.fromMesh(add2));
-  
-  
-  
-  const baseMesh = CSG.toMesh(baseCSG, baseG.matrix, material);
+function buildHovercraft(baseMat, bodyMat, cabineMat, noseMat) {
 
   const craft = new THREE.Group();
 
-  const base = baseMesh
-  base.position.y = 0.75;
+  const base = new THREE.Mesh(
+    new THREE.TorusGeometry(1.3, 0.25, 16, 32),
+    baseMat
+  );
+  base.rotation.x = Math.PI / 2;
   craft.add(base);
 
   const body = new THREE.Mesh(
-    geometry3,
+    new THREE.CylinderGeometry(1.2, 1.4, 0.8, 16),
     bodyMat
   );
-  body.position.y = 1.5;
-  body.position.x = -1;
+  body.position.y = 0.55;
   craft.add(body);
 
   const cabine = new THREE.Mesh(
@@ -119,11 +83,10 @@ export function createCar(scene) {
     maxSpeed: 30,
     maxReverseSpeed: -30,
     turnSpeed: THREE.MathUtils.degToRad(120),
-    isPlayer: true
+    isPlayer: true,
+    projectiles: []
   };
   scene.add(car);
-  // garante campos para projéteis
-  car.userData.projectiles = [];
   return car;
 }
 
@@ -190,15 +153,11 @@ export function resetCarPosition(car, trackNumber) {
     newPos = START_POS_TRACK1;
     newRot = START_ROT_TRACK1;
   }
-  // posiciona o carro 0.2 acima do topo da pista (subiu +0.1 adicional)
   car.position.set(newPos.x, newPos.y - 0.4, newPos.z);
   car.rotation.y = newRot;
   car.userData.speed = 0;
-  
-
 }
 
-//
 // ------------------------------------------------------------
 // MOVIMENTO DO CARRO DO JOGADOR
 // ------------------------------------------------------------
@@ -234,14 +193,7 @@ export function updateCar(car, delta, moveDirection) {
   car.translateX(carData.speed * delta);
 }
 
-function updateObject(mesh)
-{
-   mesh.matrixAutoUpdate = false;
-   mesh.updateMatrix();
+function updateObject(mesh) {
+  mesh.matrixAutoUpdate = false;
+  mesh.updateMatrix();
 }
-
-
-// ------------------------------------------------------------
-// TIRO — cria e atualiza projéteis atirados a partir do nariz
-// ------------------------------------------------------------
-// NOTE: funções de tiro movidas para T1/Shoot.js

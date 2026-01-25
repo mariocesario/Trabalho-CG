@@ -1,92 +1,23 @@
-import * as THREE from  'three';
+import * as THREE from 'three';
 import { CSG } from '../libs/other/CSGMesh.js';
-import { OrbitControls } from '../build/jsm/controls/OrbitControls.js';
-import {initRenderer, 
-    initCamera,
-    initDefaultBasicLight,
-    setDefaultMaterial,
-    InfoBox,
-    onWindowResize,
-    createGroundPlaneXZ} from "../libs/util/util.js";
-import { barreirasTrack2, barreirasTrack3 } from './Walls.js';
+import { setDefaultMaterial } from "../libs/util/util.js";
 
-var textureloader = new THREE.TextureLoader();
+// TextureLoader compartilhado e cache de texturas
+const textureLoader = new THREE.TextureLoader();
+const textureCache = new Map();
 
+function getTexture(path) {
+  if (textureCache.has(path)) {
+    return textureCache.get(path);
+  }
+  const texture = textureLoader.load(path);
+  textureCache.set(path, texture);
+  return texture;
+}
 
-let material ,material2 ,material3 //Initial variables
-// scene = new THREE.Scene();    // Create main scene
-// renderer = initRenderer();    // Init a basic renderer
-material = setDefaultMaterial('rgba(189, 82, 32, 1)'); // create a basic material
-material2 = setDefaultMaterial('rgba(23, 148, 39, 1)');
-material3 = setDefaultMaterial('rgba(139, 139, 139, 1)');
-// light = initDefaultBasicLight(scene); // Create a basic light to illuminate the scene
-// camera = initCamera(new THREE.Vector3(0, 15, 30)); // Init camera in this position
-// scene.add(camera); // Add camera to the scene
-// orbit = new OrbitControls( camera, renderer.domElement ); // Enable mouse rotation, pan, zoom etc.
-
-// // Listen window size changes
-// window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
-
-// // Show axes (parameter is size of each axis)
-// let axesHelper = new THREE.AxesHelper( 12 );
-// scene.add( axesHelper );
-
-// // create the ground plane
-// let plane = createGroundPlaneXZ(20, 20)
-// scene.add(plane);
-
-const geometry = new THREE.BoxGeometry( 7, 5, 2.5 );
-const geometry2 = new THREE.CylinderGeometry( 2.5, 2.5, 2.5, 14);
-
-const base = new THREE.Mesh(geometry, material2);
-const add =new THREE.Mesh(geometry2, material2);
-const add2 =new THREE.Mesh(geometry2, material2);
-
-base.position.set(0, 1.5, 0);
-base.rotateX(THREE.MathUtils.degToRad(90));
-updateObject(base);
-add.position.set(3.5, 1.5, 0);
-updateObject(add);
-add2.position.set(-3.5, 1.5, 0);
-updateObject(add2);
-
-let baseCSG = CSG.fromMesh(base);
-baseCSG =baseCSG.union(CSG.fromMesh(add));
-baseCSG =baseCSG.union(CSG.fromMesh(add2));
-
-
-
-const baseMesh = CSG.toMesh(baseCSG, base.matrix, material2);
-
- 
-baseMesh.position.set(0, 1, 0);
-baseMesh.castShadow = true;
-baseMesh.receiveShadow = true;
-
-let b = baseMesh;
-
-
-// let arvore = criaArvore2();
-// let tunel = criaTunel();
-
-// scene.add(tunel);
-
-// // Use this to show information onscreen
-// let controls = new InfoBox();
-//   controls.add("Basic Scene");
-//   controls.addParagraph();
-//   controls.add("Use mouse to interact:");
-//   controls.add("* Left button to rotate");
-//   controls.add("* Right button to translate (pan)");
-//   controls.add("* Scroll to zoom in/out.");
-//   controls.show();
-
-// render();
-// function render()
-// {
-//   requestAnimationFrame(render);
-//   renderer.render(scene, camera) // Render scene
-// }
+const material = setDefaultMaterial('rgba(189, 82, 32, 1)');
+const material2 = setDefaultMaterial('rgba(23, 148, 39, 1)');
+const material3 = setDefaultMaterial('rgba(139, 139, 139, 1)');
 
 export function criaArvore1()
 {
@@ -115,12 +46,10 @@ export function criaArvore1()
     const troncoCSG = CSG.fromMesh(cylinder).union(CSG.fromMesh(cylinder2));
     const folhasCSG = CSG.fromMesh(folha).union(CSG.fromMesh(folha2));
 
-    var folhaarv = textureloader.load('../assets/textures/grass.jpg');
-    var troncoarv = textureloader.load('../assets/textures/wood.png');
-    var folhaMaterial = new THREE.MeshLambertMaterial();
-    var troncoMaterial = new THREE.MeshLambertMaterial();
-        folhaMaterial.map = folhaarv;
-        troncoMaterial.map = troncoarv;
+    const folhaarv = getTexture('../assets/textures/grass.jpg');
+    const troncoarv = getTexture('../assets/textures/wood.png');
+    const folhaMaterial = new THREE.MeshLambertMaterial({ map: folhaarv });
+    const troncoMaterial = new THREE.MeshLambertMaterial({ map: troncoarv });
     // === Converter novamente para Mesh (mantendo materiais distintos) ===
     const troncoMesh = CSG.toMesh(troncoCSG, new THREE.Matrix4(), troncoMaterial);
     const folhasMesh = CSG.toMesh(folhasCSG, new THREE.Matrix4(), folhaMaterial);
@@ -173,12 +102,10 @@ export function criaArvore2()
     const troncoCSG = CSG.fromMesh(cylinder).union(CSG.fromMesh(cylinder4),CSG.fromMesh(cylinder3));
     const folhasCSG = CSG.fromMesh(folha).union(CSG.fromMesh(folha2));
 
-    var folhaarv = textureloader.load('../assets/textures/grass.jpg');
-    var troncoarv = textureloader.load('../assets/textures/wood.png');
-    var folhaMaterial = new THREE.MeshLambertMaterial();
-    var troncoMaterial = new THREE.MeshLambertMaterial();
-        folhaMaterial.map = folhaarv;
-        troncoMaterial.map = troncoarv;
+    const folhaarv = getTexture('../assets/textures/grass.jpg');
+    const troncoarv = getTexture('../assets/textures/wood.png');
+    const folhaMaterial = new THREE.MeshLambertMaterial({ map: folhaarv });
+    const troncoMaterial = new THREE.MeshLambertMaterial({ map: troncoarv });
     // === Converter novamente para Mesh (mantendo materiais distintos) ===
     const troncoMeshaux = CSG.toMesh(troncoCSGaux, new THREE.Matrix4(), troncoMaterial);
     const troncoMesh = CSG.toMesh(troncoCSG, new THREE.Matrix4(), troncoMaterial);
@@ -280,9 +207,8 @@ export function criaTunel()
     // 3. **NOVO**: Corta a metade inferior
     tunelCSG = tunelCSG.subtract(CSG.fromMesh(corteInferiorMesh)); // Subtrai a caixa de corte inferior
 
-    var cement = textureloader.load('../assets/textures/darkcement.jpg');
-    var tunelMaterial = new THREE.MeshLambertMaterial();
-        tunelMaterial.map = cement;
+    const cement = getTexture('../assets/textures/darkcement.jpg');
+    const tunelMaterial = new THREE.MeshLambertMaterial({ map: cement });
 
     const tunelMesh = CSG.toMesh(tunelCSG, new THREE.Matrix4(), tunelMaterial);
     
