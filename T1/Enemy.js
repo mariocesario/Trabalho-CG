@@ -9,6 +9,7 @@ import {
   MAX_LAPS,
   setEnemyWinner
 } from './Misc.js';
+import { texturaCarroBase, texturaCarroCorpo } from './Texture.js';
 
 export const START_ROT_TRACKcar2 = degreesToRadians(0);
 
@@ -20,15 +21,11 @@ export const START_ROT_TRACKcar2 = degreesToRadians(0);
 function buildHovercraft(baseMat, bodyMat, cabineMat, noseMat) {
   const craft = new THREE.Group();
 
-  const base = new THREE.Mesh(
-    new THREE.TorusGeometry(1.3, 0.25, 16, 32),
-    baseMat
-  );
+  const base = texturaCarroBase(new THREE.TorusGeometry(1.3, 0.25, 16, 32));
   base.rotation.x = Math.PI / 2;
   craft.add(base);
 
-  const body = new THREE.Mesh(
-    new THREE.CylinderGeometry(1.2, 1.4, 0.8, 16),
+  const body = texturaCarroCorpo(new THREE.CylinderGeometry(1.2, 1.4, 0.8, 16),1,
     bodyMat
   );
   body.position.y = 0.55;
@@ -41,8 +38,7 @@ function buildHovercraft(baseMat, bodyMat, cabineMat, noseMat) {
   cabine.position.set(0, 1.0, 0);
   craft.add(cabine);
 
-  const nose = new THREE.Mesh(
-    new THREE.ConeGeometry(0.4, 1.0, 16),
+  const nose = texturaCarroCorpo(new THREE.ConeGeometry(0.4, 1.0, 16),1,
     noseMat
   );
   nose.rotation.z = Math.PI / 2;

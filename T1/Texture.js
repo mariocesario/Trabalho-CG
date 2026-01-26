@@ -63,15 +63,16 @@ export function texturaExterna(geometria, n) {
 
 export function texturaBarreira(geometria) {
   let geoMaterials = [
-        setMaterial('./barreira.jpg'),
-        setMaterial('./barreira.jpg'),
+        setMaterial('./texturas/barreira.jpg'),
+        setMaterial('./texturas/barreira.jpg'),
         setMaterial('../assets/textures/crate.jpg'),
         new THREE.MeshBasicMaterial({color:'rgb(255,255,255)'}),
-        setMaterial('./barreira.jpg'),
-        setMaterial('./barreira.jpg')
+        setMaterial('./texturas/barreira.jpg'),
+        setMaterial('./texturas/barreira.jpg')
     ];
   return new THREE.Mesh(geometria, geoMaterials);
 }
+
 export function texturaPistaElevada(geometria)
 {
     let geoMaterials = [
@@ -88,6 +89,36 @@ export function texturaPistaElevada(geometria)
     return pista;
 }
 
+export function texturaCarroBase(geometria)
+{
+  const material = getMaterial('./texturas/Pneu.jpg');
+
+  return new THREE.Mesh(geometria, material);
+}
+
+export function texturaCarroCorpo(geometria,n,orimaterial)
+{
+  let material;
+  
+  if(n == 1)
+  {
+    material = [
+      getMaterial('./texturas/carro.jpg'),
+      orimaterial,
+      orimaterial
+    ];
+  }
+  else
+  {
+    material = [
+      getMaterial('./texturas/carro1.jpg'),
+      orimaterial,
+      orimaterial
+    ];
+  }
+
+  return new THREE.Mesh(geometria, material);
+}
 
 function setMaterial(file, repeatU = 1, repeatV = 1, color = 'rgb(255,255,255)'){
     let loader = new THREE.TextureLoader();

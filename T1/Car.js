@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { CSG } from '../libs/other/CSGMesh.js';
 import { setDefaultMaterial, degreesToRadians } from "../libs/util/util.js";
+import { texturaCarroBase, texturaCarroCorpo } from './Texture.js';
 
 // ------------------------------------------------------------
 // POSIÇÕES INICIAIS — 3 PISTAS
@@ -23,17 +24,13 @@ function buildHovercraft(baseMat, bodyMat, cabineMat, noseMat) {
 
   const craft = new THREE.Group();
 
-  const base = new THREE.Mesh(
-    new THREE.TorusGeometry(1.3, 0.25, 16, 32),
-    baseMat
-  );
+  const base = texturaCarroBase(new THREE.TorusGeometry(1.3, 0.25, 16, 32));
+
   base.rotation.x = Math.PI / 2;
   craft.add(base);
 
-  const body = new THREE.Mesh(
-    new THREE.CylinderGeometry(1.2, 1.4, 0.8, 16),
-    bodyMat
-  );
+  const body = texturaCarroCorpo(new THREE.CylinderGeometry(1.2, 1.4, 0.8, 16),2,bodyMat);
+
   body.position.y = 0.55;
   craft.add(body);
 
@@ -44,10 +41,7 @@ function buildHovercraft(baseMat, bodyMat, cabineMat, noseMat) {
   cabine.position.set(0, 1.0, 0);
   craft.add(cabine);
 
-  const nose = new THREE.Mesh(
-    new THREE.ConeGeometry(0.4, 1.0, 16),
-    noseMat
-  );
+  const nose = texturaCarroCorpo(new THREE.ConeGeometry(0.4, 1.0, 16),2,noseMat)
   nose.rotation.z = Math.PI / 2;
   nose.position.set(1.7, 0.35, 0);
   nose.name = 'nose';
@@ -64,9 +58,9 @@ export function createCar(scene) {
 
   const car = buildHovercraft(
     setDefaultMaterial('rgb(255,100,100)'), // base
-    setDefaultMaterial('rgb(255,0,0)'),     // corpo
-    setDefaultMaterial('rgb(255,255,255)'), // cabine
-    setDefaultMaterial('rgb(255,0,0)')      // nariz
+    setDefaultMaterial('rgb(248, 82, 8)'),     // corpo
+    setDefaultMaterial('rgb(0, 0, 0)'), // cabine
+    setDefaultMaterial('rgb(248, 82, 8)')      // nariz
   );
 
   // posição inicial padrão

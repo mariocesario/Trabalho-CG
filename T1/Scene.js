@@ -583,7 +583,7 @@ function checkVehicleCollision(vehicle, track) {
           if (slideDir.lengthSq() > 0.001) {
             slideDir.normalize();
             const speed = Math.abs(vehicle.userData.speed || 0);
-            const slideSpeed = speed * 0.6;
+            const slideSpeed = speed * 0.8;
 
             vehicle.userData.speed = Math.sign(vehicle.userData.speed || 1) * slideSpeed;
 
