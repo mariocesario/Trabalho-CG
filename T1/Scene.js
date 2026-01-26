@@ -536,82 +536,94 @@ function keyboardUpdate() {
 // COLLISIONS
 // ------------------------------------------------------------
 // Função genérica para verificar colisão de qualquer veículo
+// Regra: colisão altera velocidade/rotação, não desloca position (exceto empurrar para fora)
 function checkVehicleCollision(vehicle, track) {
-  const vehicleBB = new THREE.Box3().setFromObject(vehicle);
-  const vehicleDir = new THREE.Vector3(
-    Math.cos(vehicle.rotation.y),
-    0,
-    -Math.sin(vehicle.rotation.y)
-  );
+  const vehicleDir = new THREE.Vector3(Math.cos(vehicle.rotation.y), 0, -Math.sin(vehicle.rotation.y));
 
   const list = track === 1 ? barreirasTrack1 :
-               track === 2 ? barreirasTrack2 :
-                              barreirasTrack3;
+              track === 2 ? barreirasTrack2 :
+                             barreirasTrack3;
 
-  for (const { mesh, bb } of list) {
-    bb.setFromObject(mesh);
+  let hasCollision = false;
+  let slideApplied = false;
+  let maxIterations = 10;
 
-    if (vehicleBB.intersectsBox(bb)) {
+  for (let iteration = 0; iteration < maxIterations; iteration++) {
+    const vehicleBB = new THREE.Box3().setFromObject(vehicle);
+    let foundCollision = false;
 
-      // ======= Detecta sobreposição =======
-      const overlapX = Math.min(vehicleBB.max.x, bb.max.x) - Math.max(vehicleBB.min.x, bb.min.x);
-      const overlapZ = Math.min(vehicleBB.max.z, bb.max.z) - Math.max(vehicleBB.min.z, bb.min.z);
+    for (const { mesh, bb } of list) {
+      bb.setFromObject(mesh);
 
-      let normal = new THREE.Vector3();
-      if (overlapX < overlapZ) {
-        normal.set(vehicle.position.x > mesh.position.x ? 1 : -1, 0, 0);
-      } else {
-        normal.set(0, 0, vehicle.position.z > mesh.position.z ? 1 : -1);
+      if (vehicleBB.intersectsBox(bb)) {
+        foundCollision = true;
+        hasCollision = true;
+
+        const overlapX = Math.min(vehicleBB.max.x, bb.max.x) - Math.max(vehicleBB.min.x, bb.min.x);
+        const overlapZ = Math.min(vehicleBB.max.z, bb.max.z) - Math.max(vehicleBB.min.z, bb.min.z);
+
+        let normal = new THREE.Vector3();
+        if (overlapX < overlapZ) {
+          normal.set(vehicle.position.x > mesh.position.x ? 1 : -1, 0, 0);
+        } else {
+          normal.set(0, 0, vehicle.position.z > mesh.position.z ? 1 : -1);
+        }
+
+        // Correção mínima: overlap + 0.005 (evita catapulta)
+        const overlapAmount = Math.min(overlapX, overlapZ);
+        const correction = normal.clone().multiplyScalar(overlapAmount + 0.005);
+        vehicle.position.add(correction);
+
+        // Deslize via velocidade (não move position)
+        if (!slideApplied) {
+          slideApplied = true;
+          const movementDir = vehicleDir.clone();
+          const slideDir = movementDir.clone().projectOnPlane(normal);
+
+          if (slideDir.lengthSq() > 0.001) {
+            slideDir.normalize();
+            const speed = Math.abs(vehicle.userData.speed || 0);
+            const slideSpeed = speed * 0.6;
+
+            vehicle.userData.speed = Math.sign(vehicle.userData.speed || 1) * slideSpeed;
+
+            const targetRotation = Math.atan2(-slideDir.z, slideDir.x);
+            let rotationDiff = targetRotation - vehicle.rotation.y;
+            while (rotationDiff > Math.PI) rotationDiff -= 2 * Math.PI;
+            while (rotationDiff < -Math.PI) rotationDiff += 2 * Math.PI;
+            vehicle.rotation.y += rotationDiff * 0.3;
+          } else {
+            if (vehicle.userData.speed !== undefined) {
+              vehicle.userData.speed = 0;
+            }
+          }
+        }
       }
+    }
 
-      // ======= Correção suave de posição =======
-      const correction = normal.clone().multiplyScalar(Math.min(overlapX, overlapZ) * 0.4);
-      vehicle.position.add(correction);
+    if (!foundCollision) break;
+  }
 
-      // ======= Velocidade e direção =======
-      const vehicleSpeed = vehicle.userData.speed || 0;
-      if (vehicleSpeed === 0) return true;
-
-      const movementDir = vehicleDir.clone()
-        .multiplyScalar(Math.sign(vehicleSpeed))
-        .normalize();
-
-      // ======= Ângulo de impacto =======
-      const angleRad = movementDir.angleTo(normal);
-      const angleDeg = THREE.MathUtils.radToDeg(angleRad);
-
-      // ======= FATOR ANGULAR SUAVIZADO =======
-      // até 45° -> praticamente só desliza
-      let angleFactor = 0;
-      if (angleDeg > 45) {
-        angleFactor = (angleDeg - 45) / 45; // 0..1
-        angleFactor = THREE.MathUtils.clamp(angleFactor, 0, 1);
-        angleFactor *= angleFactor; // curva quadrática (mais suave)
+  // Verificação final: não atravessar
+  if (hasCollision) {
+    const vehicleBB = new THREE.Box3().setFromObject(vehicle);
+    for (const { mesh, bb } of list) {
+      bb.setFromObject(mesh);
+      if (vehicleBB.intersectsBox(bb)) {
+        const overlapX = Math.min(vehicleBB.max.x, bb.max.x) - Math.max(vehicleBB.min.x, bb.min.x);
+        const overlapZ = Math.min(vehicleBB.max.z, bb.max.z) - Math.max(vehicleBB.min.z, bb.min.z);
+        let normal = new THREE.Vector3();
+        if (overlapX < overlapZ) {
+          normal.set(vehicle.position.x > mesh.position.x ? 1 : -1, 0, 0);
+        } else {
+          normal.set(0, 0, vehicle.position.z > mesh.position.z ? 1 : -1);
+        }
+        vehicle.position.add(normal.clone().multiplyScalar(0.05));
       }
-
-      // ======= REDUÇÃO PROGRESSIVA =======
-      const baseReduction = 0.005;      // atrito mínimo lateral
-      const frontalReduction = 0.10;    // impacto frontal forte
-      const reduction = baseReduction + angleFactor * frontalReduction;
-
-      let newSpeed = Math.abs(vehicleSpeed) * (1 - reduction);
-
-      if (newSpeed < 0.02) newSpeed = 0;
-      vehicle.userData.speed = Math.sign(vehicleSpeed) * newSpeed;
-
-      // ======= DESLIZE (original preservado) =======
-      const slideDir = movementDir.clone()
-        .sub(normal.clone().multiplyScalar(movementDir.dot(normal)));
-
-      if (slideDir.lengthSq() > 0) slideDir.normalize();
-
-      vehicle.position.add(slideDir.multiplyScalar(newSpeed * 0.05));
-
-      return true;
     }
   }
 
-  return false;
+  return hasCollision;
 }
 
 // Função de compatibilidade para o carro do jogador
@@ -713,21 +725,119 @@ function checkAndRespawnIfFallen(vehicle) {
         // se ainda no ar, não respawnar
         return false;
       }
-      // aplica respawn normal (não estava pulando)
-      try {
-        const rp = gap.respawn;
-        vehicle.position.set(rp.x, rp.y, rp.z);
-        if (typeof vehicle.userData.speed !== 'undefined') vehicle.userData.speed = 0;
-        if (typeof vehicle.userData.isPlayer !== 'undefined' && vehicle.userData.isPlayer) {
-          // reposiciona câmera imediatamente atrás do carro
-          camera.position.set(vehicle.position.x - 15, vehicle.position.y + 4, vehicle.position.z);
-          camera.lookAt(vehicle.position);
-        }
-      } catch (e) {}
-      return true;
+      // Deixa cair naturalmente até o solo; após 2s applyGravityIfOffTrack fará respawn no último checkpoint
+      if (!vehicle.userData.isFalling) {
+        vehicle.userData.isFalling = true;
+        vehicle.userData.vyFall = 0;
+      }
+      return false;
     }
   }
   return false;
+}
+
+// Nível do solo e gravidade para queda fora da pista
+const groundRay = new THREE.Raycaster();
+const GROUND_LEVEL = -0.2;
+const GRAVITY_FALL = 30;
+
+function applyGravityIfOffTrack(vehicle, delta) {
+  if (vehicle.userData.isJumping) return;
+
+  if (currentTrack === 3 && track3 && track3.userData && track3.userData.gap) {
+    const gap = track3.userData.gap;
+    const dx = Math.abs(vehicle.position.x - gap.center.x);
+    const dz = Math.abs(vehicle.position.z - gap.center.z);
+    if (dx <= gap.halfSize.x && dz <= gap.halfSize.z) {
+      if (!vehicle.userData.isFalling) return;
+    }
+  }
+
+  if (vehicle.userData.vyFall === undefined) vehicle.userData.vyFall = 0;
+
+  const currentTrackGroup = currentTrack === 1 ? track1 : currentTrack === 2 ? track2 : track3;
+  if (!currentTrackGroup) return;
+
+  const origin = vehicle.position.clone();
+  origin.y += 0.5;
+  groundRay.set(origin, new THREE.Vector3(0, -1, 0));
+  const trackMeshes = currentTrackGroup.children.filter(c => c.isMesh);
+  const intersects = groundRay.intersectObjects(trackMeshes, true);
+  const maxDistanceToGround = 2.0;
+
+  if (intersects.length > 0 && intersects[0].distance <= maxDistanceToGround) {
+    const targetY = origin.y - intersects[0].distance + 0.1;
+    vehicle.position.y = targetY;
+    vehicle.userData.vyFall = 0;
+    vehicle.userData.isFalling = false;
+    vehicle.userData.groundRespawnTimer = 0;
+  } else {
+    vehicle.userData.isFalling = true;
+    vehicle.userData.vyFall -= GRAVITY_FALL * delta;
+    vehicle.position.y += vehicle.userData.vyFall * delta;
+
+    if (vehicle.position.y <= GROUND_LEVEL + 0.5) {
+      vehicle.position.y = GROUND_LEVEL + 0.5;
+      vehicle.userData.vyFall = 0;
+      if (vehicle.userData.speed !== undefined) vehicle.userData.speed *= 0.3;
+
+      if (vehicle.userData.groundRespawnTimer === undefined) {
+        vehicle.userData.groundRespawnTimer = 0;
+      }
+      vehicle.userData.groundRespawnTimer += delta;
+
+      if (vehicle.userData.groundRespawnTimer >= 2.0) {
+        respawnToLastCheckpoint(vehicle);
+        vehicle.userData.groundRespawnTimer = 0;
+        vehicle.userData.isFalling = false;
+      }
+    }
+  }
+}
+
+function respawnToLastCheckpoint(vehicle) {
+  const checkpoints = currentTrack === 1 ? checkpointsTrack1 :
+                      currentTrack === 2 ? checkpointsTrack2 :
+                                           checkpointsTrack3;
+  if (!checkpoints || checkpoints.length === 0) return;
+
+  let lastCheckpointIndex = vehicle.userData.lastCheckpointIndex !== undefined ? vehicle.userData.lastCheckpointIndex : 0;
+  if (lastCheckpointIndex < 0 || lastCheckpointIndex >= checkpoints.length) lastCheckpointIndex = 0;
+
+  const cp = checkpoints[lastCheckpointIndex];
+  if (!cp || !cp.pos) return;
+
+  vehicle.position.set(cp.pos.x, cp.pos.y + 0.5, cp.pos.z);
+  vehicle.userData.speed = 0;
+  vehicle.userData.vyFall = 0;
+  vehicle.userData.isFalling = false;
+  vehicle.userData.groundRespawnTimer = 0;
+
+  if (vehicle.userData.isPlayer) {
+    try {
+      camera.position.set(vehicle.position.x - 15, vehicle.position.y + 4, vehicle.position.z);
+      camera.lookAt(vehicle.position);
+    } catch (e) {}
+  }
+}
+
+function updateLastCheckpoint(vehicle) {
+  const checkpoints = currentTrack === 1 ? checkpointsTrack1 :
+                      currentTrack === 2 ? checkpointsTrack2 :
+                                           checkpointsTrack3;
+  if (!checkpoints || checkpoints.length === 0) return;
+
+  if (vehicle.userData.lastCheckpointIndex === undefined) {
+    vehicle.userData.lastCheckpointIndex = 0;
+  }
+  for (let i = 0; i < checkpoints.length; i++) {
+    const cp = checkpoints[i];
+    const dist = vehicle.position.distanceTo(cp.pos);
+    if (dist < (cp.radius || 20)) {
+      vehicle.userData.lastCheckpointIndex = i;
+      break;
+    }
+  }
 }
 
 // ------------------------------------------------------------
@@ -813,41 +923,22 @@ function render() {
         if (vehicle.position.y <= desiredTopY + 0.11 && (vehicle.userData.vy || 0) <= 0) landedOK = true;
 
         if (landedOK) {
-          // pousou do outro lado: encerra o pulo e ajusta altura ao topo da pista
           vehicle.userData.isJumping = false;
           vehicle.userData.vy = 0;
           vehicle.userData.jumpTimer = 0;
-          try {
-            vehicle.position.y = desiredTopY;
-          } catch (e) {}
-        } else if (vehicle.userData.jumpTimer >= 3.0) {
-          // timeout: não conseguiu atravessar em 3s — teleportar para início da reta (y=0)
-          try {
-            if (gap) {
-              // posiciona no topo da pista do lado do gap
-              vehicle.position.set(gap.center.x, desiredTopY, gap.center.z);
-            }
-            if (typeof vehicle.userData.speed !== 'undefined') vehicle.userData.speed = 0;
-            vehicle.userData.isJumping = false;
-            vehicle.userData.vy = 0;
-            vehicle.userData.jumpTimer = 0;
-            // atualiza câmera para o jogador
-            if (typeof vehicle.userData.isPlayer !== 'undefined' && vehicle.userData.isPlayer) {
-              camera.position.set(vehicle.position.x - 15, vehicle.position.y + 4, vehicle.position.z);
-              camera.lookAt(vehicle.position);
-            }
-          } catch (e) {}
+          try { vehicle.position.y = desiredTopY; } catch (e) {}
+        } else if (vehicle.position.y <= GROUND_LEVEL + 0.5) {
+          // Caiu no solo — não conseguiu pular o buraco
+          vehicle.position.y = GROUND_LEVEL + 0.5;
+          vehicle.userData.isJumping = false;
+          vehicle.userData.vy = 0;
+          vehicle.userData.jumpTimer = 0;
+          if (typeof vehicle.userData.speed !== 'undefined') vehicle.userData.speed *= 0.3;
         }
 
-        // evita que o veículo afunde muito abaixo do mundo
-        // também impede que caia abaixo do topo da pista após o salto
-        if (vehicle.position.y < desiredTopY + 0.1) {
-          vehicle.position.y = desiredTopY + 0.0;
-          vehicle.userData.isJumping = false;
-          vehicle.userData.vy = 0;
-          vehicle.userData.jumpTimer = 0;
+        if (vehicle.position.y < GROUND_LEVEL) {
+          vehicle.position.y = GROUND_LEVEL + 0.5;
         }
-        if (vehicle.position.y < -50) vehicle.position.y = -50;
       }
     });
   }
@@ -947,6 +1038,14 @@ function render() {
       checkCarToCarCollision(enemies[i], enemies[j]);
     }
   }
+
+  // Atualiza o último checkpoint visitado (para respawn após cair no solo)
+  try { updateLastCheckpoint(car); } catch(e) {}
+  enemies.forEach(enemy => { try { updateLastCheckpoint(enemy); } catch(e) {} });
+
+  // Aplica gravidade se estiver fora da pista; após 2s no solo, respawn no último checkpoint
+  try { applyGravityIfOffTrack(car, delta); } catch(e) {}
+  enemies.forEach(enemy => { try { applyGravityIfOffTrack(enemy, delta); } catch(e) {} });
 
   // Verifica se algum veículo caiu na descontinuidade (pista 3)
   try { checkAndRespawnIfFallen(car); } catch(e) {}
