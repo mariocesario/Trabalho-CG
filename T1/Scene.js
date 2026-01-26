@@ -8,7 +8,6 @@ import {
   setDefaultMaterial,
   InfoBox,
   SecondaryBox,
-  onWindowResize
 } from "../libs/util/util.js";
 
 import { createCar, resetCarPosition, updateCar, START_POS_TRACK1, START_POS_TRACK2, START_POS_TRACK3 } from './Car.js';
@@ -361,7 +360,20 @@ function prepareForCountdown(seconds = 5) {
 // ------------------------------------------------------------
 // KEYBOARD
 // ------------------------------------------------------------
-window.addEventListener('resize', () => onWindowResize(camera, renderer), false);
+function onResize() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(w, h);
+}
+
+window.addEventListener('resize', onResize, false);
+// initial sizing to match current viewport (also handles mobile rotation)
+onResize();
 const keyboard = new KeyboardState();
 const clock = new THREE.Clock();
 const moveDirection = { forward: false, backward: false, left: false, right: false };
