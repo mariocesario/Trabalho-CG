@@ -62,8 +62,15 @@ export function texturaExterna(geometria, n) {
 }
 
 export function texturaBarreira(geometria) {
-  const material = getMaterial('../assets/textures/crate.jpg');
-  return new THREE.Mesh(geometria, material);
+  let geoMaterials = [
+        setMaterial('./barreira.jpg'),
+        setMaterial('./barreira.jpg'),
+        setMaterial('../assets/textures/crate.jpg'),
+        new THREE.MeshBasicMaterial({color:'rgb(255,255,255)'}),
+        setMaterial('./barreira.jpg'),
+        setMaterial('./barreira.jpg')
+    ];
+  return new THREE.Mesh(geometria, geoMaterials);
 }
 export function texturaPistaElevada(geometria)
 {

@@ -213,12 +213,12 @@ export function createFourQuadrantTrack(trackGroup, material) {
 
   const segmentData = [
     { length: 100, isHorizontal: true, pos: new THREE.Vector3(-40, -0.1, -90) },
-    { length: 200, isHorizontal: false, pos: new THREE.Vector3(0, -0.1, 0) },
+    { length: 200, isHorizontal: false, pos: new THREE.Vector3(0, -0.15, 0) },
     { length: 130, isHorizontal: true, pos: new THREE.Vector3(25, -0.1, 10) },
     { length: 40, isHorizontal: true, pos: new THREE.Vector3(-70, -0.1, 10) },
-    { length: 60, isHorizontal: false, pos: new THREE.Vector3(80, -0.1, 50) },
+    { length: 60, isHorizontal: false, pos: new THREE.Vector3(80, -0.15, 50) },
     { length: 100, isHorizontal: true, pos: new THREE.Vector3(40, -0.1, 90) },
-    { length: 80, isHorizontal: false, pos: new THREE.Vector3(-80, -0.1, -40) },
+    { length: 80, isHorizontal: false, pos: new THREE.Vector3(-80, -0.15, -40) },
   ];
 
   let rot = new THREE.Matrix4().makeRotationX(degreesToRadians(-90));
