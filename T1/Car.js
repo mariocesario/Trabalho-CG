@@ -86,50 +86,6 @@ export function createCar(scene) {
 
 
 // ------------------------------------------------------------
-// CARRO ADVERSÁRIO (NOVO)
-// ------------------------------------------------------------
-export function createEnemyCar(scene) {
-
-  // Materiais foscos (Lambert)
-  const matteRed    = new THREE.MeshLambertMaterial({ color: 0xaa0000 });
-  const matteBlue   = new THREE.MeshLambertMaterial({ color: 0x0033aa });
-
-  // Material brilhante (Phong)
-  const shinyYellow = new THREE.MeshPhongMaterial({
-    color: 0xffff00,
-    shininess: 100
-  });
-
-  // Cria hovercraft adversário
-  const enemy = buildHovercraft(
-    matteBlue,     // base fosca azul
-    shinyYellow,   // corpo brilhante amarelo
-    matteRed,      // cabine fosca vermelha
-    shinyYellow    // nariz brilhante amarelo
-  );
-
-  enemy.position.set(-110, 0.5, -100);
-  enemy.rotation.y = 0;
-
-  enemy.userData = {
-    speed: 0,
-    accel: 12.0,
-    brake: 10.0,
-    drag: 10,
-    maxSpeed: 18,
-    turnSpeed: THREE.MathUtils.degToRad(70),
-
-    // controle do bot
-    aiEnabled: true,
-    aiTargetIndex: 0
-  };
-
-  scene.add(enemy);
-  return enemy;
-}
-
-
-// ------------------------------------------------------------
 // RESET DO CARRO POR PISTA
 // ------------------------------------------------------------
 export function resetCarPosition(car, trackNumber) {
@@ -185,9 +141,4 @@ export function updateCar(car, delta, moveDirection) {
 
   // Mover
   car.translateX(carData.speed * delta);
-}
-
-function updateObject(mesh) {
-  mesh.matrixAutoUpdate = false;
-  mesh.updateMatrix();
 }

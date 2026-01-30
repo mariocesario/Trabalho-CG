@@ -27,11 +27,23 @@ export function initLight(scene, car) {
   dirLight.position.set(50, 80, 40);
   dirLight.castShadow = true;
 
-  // === Parâmetros de sombra ===
-  dirLight.shadow.mapSize.width = 4096;
-  dirLight.shadow.mapSize.height = 4096;
+  // direciona a luz para o carro para sombras coerentes
+  if (car) {
+    dirLight.target = car;
+  } else {
+    dirLight.target = new THREE.Object3D();
+    scene.add(dirLight.target);
+  }
 
-  const d = 120;
+  // === Parâmetros de sombra (dinâmicos) ===
+  const isMobile = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  // diminuir ainda mais para melhorar performance: mobile=512, desktop=1024
+  const shadowSize = isMobile ? 512 : 1024;
+  dirLight.shadow.mapSize.width = shadowSize;
+  dirLight.shadow.mapSize.height = shadowSize;
+
+  // reduzir alcance da câmera de sombra para concentrar resolução
+  const d = 80;
   dirLight.shadow.camera.left = -d;
   dirLight.shadow.camera.right = d;
   dirLight.shadow.camera.top = d;
@@ -52,6 +64,7 @@ export function initLight(scene, car) {
   function updateLightFollow() {
     dirLight.position.x = car.position.x + 50;
     dirLight.position.z = car.position.z + 40;
+    try { dirLight.target.position.copy(car.position); } catch(e) {}
   }
 
   return { dirLight, updateLightFollow };

@@ -440,6 +440,36 @@ const tunel = criaTunel(scene);
 tunel.position.set(-90, 4, 0);
 scene.add(tunel);
 
+// Habilita sombras em toda a cena (para meshes recém-criados)
+function enableShadowsForScene() {
+  try {
+    // Apply shadows only to key objects to reduce overhead
+    const targets = [];
+    if (car) targets.push(car);
+    if (enemies && enemies.length) enemies.forEach(e => targets.push(e));
+    if (tunel) targets.push(tunel);
+    if (track1) targets.push(track1);
+    if (track2) targets.push(track2);
+    if (track3) targets.push(track3);
+    if (groupSquareWalls) targets.push(groupSquareWalls);
+    if (groupLWalls) targets.push(groupLWalls);
+    if (groupThirdWalls) targets.push(groupThirdWalls);
+
+    targets.forEach(obj => {
+      if (!obj) return;
+      obj.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+    });
+
+    // trees array may contain Groups — ensure their children have shadows
+    if (arvoresAtuais && arvoresAtuais.length) {
+      arvoresAtuais.forEach(a => { if (a) a.traverse(n => { if (n.isMesh) { n.castShadow = true; n.receiveShadow = true; } }); });
+    }
+  } catch (e) {}
+}
+
+// aplica sombras iniciais apenas para objetos-chave
+enableShadowsForScene();
+
 // ------------------------------------------------------------
 // KEYBOARD UPDATE
 // ------------------------------------------------------------
@@ -480,6 +510,7 @@ function keyboardUpdate() {
     lapDiv.innerText = "Volta: 0 / " + MAX_LAPS;
     removeArvores();
     arvoresAtuais = criaArvoresQuadrado(scene);
+    enableShadowsForScene();
     // resetar munição ao trocar de pista
     car.userData.shotsRemaining = car.userData.maxShotsPerLap || 4;
     enemies.forEach(e => { if (e.userData) e.userData.shotsRemaining = e.userData.maxShotsPerLap || 4; });
@@ -508,6 +539,7 @@ function keyboardUpdate() {
     scene.remove(tunel);
     tunel.position.set(-90, 4, -50);
     scene.add(tunel);
+    enableShadowsForScene();
     // resetar munição ao trocar de pista
     car.userData.shotsRemaining = car.userData.maxShotsPerLap || 4;
     enemies.forEach(e => { if (e.userData) e.userData.shotsRemaining = e.userData.maxShotsPerLap || 4; });
@@ -536,6 +568,7 @@ function keyboardUpdate() {
     scene.remove(tunel);
     tunel.position.set(-80, 4, -50);
     scene.add(tunel);
+    enableShadowsForScene();
     // resetar munição ao trocar de pista
     car.userData.shotsRemaining = car.userData.maxShotsPerLap || 4;
     enemies.forEach(e => { if (e.userData) e.userData.shotsRemaining = e.userData.maxShotsPerLap || 4; });

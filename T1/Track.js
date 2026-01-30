@@ -142,8 +142,7 @@ export function createSquareTrackElements(trackGroup, material) {
   box2.position.set(0, centerY, -90);
   box3.position.set(-90, centerY, 0);
   box4.position.set(90, centerY, 0);
-
-  box1.receiveShadow = box2.receiveShadow = box3.receiveShadow = box4.receiveShadow = true;
+  box1.castShadow = box1.receiveShadow = box2.castShadow = box2.receiveShadow = box3.castShadow = box3.receiveShadow = box4.castShadow = box4.receiveShadow = true;
   trackGroup.add(box1, box2, box3, box4);
 }
 
@@ -176,6 +175,7 @@ export function createLTrackElements(trackGroup, material) {
       mesh = texturaPistaElevada(new THREE.BoxGeometry(trackWidth, thickness, s.length));
     }
     mesh.position.set(s.pos.x, centerY + s.pos.y, s.pos.z);
+    mesh.castShadow = true;
     mesh.receiveShadow = true;
     trackGroup.add(mesh);
     // Cria área de água apenas na terceira reta horizontal (contando apenas segmentos horizontais)
@@ -284,6 +284,7 @@ export function createFourQuadrantTrack(trackGroup, material) {
       mesh = texturaPistaElevada(new THREE.BoxGeometry(trackWidth, thickness3, s.length));
     }
     mesh.position.set(s.pos.x, centerY3, s.pos.z);
+    mesh.castShadow = true;
     mesh.receiveShadow = true;
     trackGroup.add(mesh);
   });
