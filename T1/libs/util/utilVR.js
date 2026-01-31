@@ -4,7 +4,7 @@ import { FlyControls } from '../../build/jsm/controls/FlyControls.js';
 import { InfoBox, 
          getMaxSize,
          createGroundPlane,
-         initDefaultBasicLight} from "../../libs/util/util.js";
+         initDefaultBasicLight} from "./util.js";
 
 function showMessages(message1, message2)
 {
