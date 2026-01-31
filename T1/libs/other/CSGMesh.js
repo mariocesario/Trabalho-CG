@@ -60,7 +60,7 @@ solid `csg`. Neither this solid nor the solid `csg` are modified.
 
 */
 
-import * as THREE from './build/three.module.min.js';
+import * as THREE from 'three';
 
 
 var CSG = /** @class */ (function () {
