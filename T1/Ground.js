@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { degreesToRadians } from "../libs/util/util.js";
+import { degreesToRadians } from "./libs/util/util.js";
 import { texturaExterna } from './Texture.js';
 
 export function createGroundPlane(scene,n) {

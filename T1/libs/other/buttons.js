@@ -6,7 +6,7 @@
   Usage:
 
   * In HTML's head load buttons.css
-    <link rel="stylesheet" href="../libs/other/buttons.css"> 
+    <link rel="stylesheet" href="./libs/other/buttons.css"> 
   
   * In HTML's body create button's
     <button style="bottom:20px; right: 120px;" id="A" class="video-game-button">A</button>
@@ -14,7 +14,7 @@
     <button style="top:10px; right: 10px; width: 1emp; line-height: 1.4em; font-size: 10pt; background-color: #cccccc; background-image:none" id="full" class="video-game-button">[ ]</button>     
 
   * In JS, import Buttons and call buttons' constructor passing the callbacks for up and down actions
-    import {Buttons} from "../libs/other/buttons.js";    
+    import {Buttons} from "./libs/other/buttons.js";    
     var buttons = new Buttons(onButtonDown, onButtonUp);
 
  *******************/

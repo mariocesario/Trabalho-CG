@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { setDefaultMaterial } from "../libs/util/util.js";
+import { setDefaultMaterial } from "./libs/util/util.js";
 
 // Tenta tocar um arquivo de áudio com vários prefixes para evitar 404s quando rodando em subpastas
 // Agora tenta procurar em `T1/` primeiro (os arquivos foram copiados para essa pasta),

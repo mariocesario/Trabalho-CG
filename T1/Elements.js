@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { CSG } from '../libs/other/CSGMesh.js';
-import { setDefaultMaterial } from "../libs/util/util.js";
+import { CSG } from './libs/other/CSGMesh.js';
+import { setDefaultMaterial } from "./libs/util/util.js";
 
 // TextureLoader compartilhado e cache de texturas
 const textureLoader = new THREE.TextureLoader();

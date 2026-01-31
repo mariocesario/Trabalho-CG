@@ -1,6 +1,6 @@
 // Scene.js
 import * as THREE from 'three';
-import KeyboardState from '../libs/util/KeyboardState.js';
+import KeyboardState from './libs/util/KeyboardState.js';
 import { criaArvoresQuadrado, criaArvoresL, criaArvoresQuatroQuadrantes, criaTunel } from './Elements.js';
 import { initRenderer } from './Renderer.js';
 import { initLight} from './Light.js';
@@ -8,7 +8,7 @@ import {
   setDefaultMaterial,
   InfoBox,
   SecondaryBox,
-} from "../libs/util/util.js";
+} from "./libs/util/util.js";
 
 import { createCar, resetCarPosition, updateCar, START_POS_TRACK1, START_POS_TRACK2, START_POS_TRACK3 } from './Car.js';
 import { shootFromCar, updateProjectiles } from './Shoot.js';

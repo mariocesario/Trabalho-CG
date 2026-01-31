@@ -1,7 +1,7 @@
 // Car.js
 import * as THREE from 'three';
-import { CSG } from '../libs/other/CSGMesh.js';
-import { setDefaultMaterial, degreesToRadians } from "../libs/util/util.js";
+import { CSG } from './libs/other/CSGMesh.js';
+import { setDefaultMaterial, degreesToRadians } from "./libs/util/util.js";
 import { texturaCarroBase, texturaCarroCorpo } from './Texture.js';
 
 // ------------------------------------------------------------

@@ -1,6 +1,6 @@
 // Enemy.js
 import * as THREE from 'three';
-import { degreesToRadians } from "../libs/util/util.js";
+import { degreesToRadians } from "./libs/util/util.js";
 import { START_POS_TRACK1, START_POS_TRACK2, START_POS_TRACK3 } from './Car.js';
 import {
   checkpointsTrack1,
