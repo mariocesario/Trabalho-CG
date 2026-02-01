@@ -76,12 +76,12 @@ export function texturaBarreira(geometria) {
 export function texturaPistaElevada(geometria)
 {
     let geoMaterials = [
-        setMaterial('./texturas/stone.jpg'),
-        setMaterial('./texturas/stone.jpg'),
-        setMaterial('./texturas/asfalto.jpg'),
-        setMaterial('./texturas/stone.jpg'),
-        setMaterial('./texturas/stone.jpg'),
-        setMaterial('./texturas/stone.jpg')
+        setMaterial('./texturasimportadas/rocks.png',20,2),
+        setMaterial('./texturasimportadas/rocks.png',20,2),
+        setMaterial('./texturasimportadas/pista.png',4,4),
+        new THREE.MeshBasicMaterial({color:'rgb(0,200,100)'}),
+        setMaterial('./texturasimportadas/rocks.png',20,2),
+        setMaterial('./texturasimportadas/rocks.png',20,2)
     ];
 
     let pista = new THREE.Mesh(geometria, geoMaterials);
