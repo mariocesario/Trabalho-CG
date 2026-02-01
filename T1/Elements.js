@@ -46,8 +46,8 @@ export function criaArvore1()
     const troncoCSG = CSG.fromMesh(cylinder).union(CSG.fromMesh(cylinder2));
     const folhasCSG = CSG.fromMesh(folha).union(CSG.fromMesh(folha2));
 
-    const folhaarv = getTexture('../assets/textures/grass.jpg');
-    const troncoarv = getTexture('../assets/textures/wood.png');
+    const folhaarv = getTexture('./texturas/grass.jpg');
+    const troncoarv = getTexture('./texturas/wood.png');
     const folhaMaterial = new THREE.MeshLambertMaterial({ map: folhaarv });
     const troncoMaterial = new THREE.MeshLambertMaterial({ map: troncoarv });
     // === Converter novamente para Mesh (mantendo materiais distintos) ===
@@ -102,8 +102,8 @@ export function criaArvore2()
     const troncoCSG = CSG.fromMesh(cylinder).union(CSG.fromMesh(cylinder4),CSG.fromMesh(cylinder3));
     const folhasCSG = CSG.fromMesh(folha).union(CSG.fromMesh(folha2));
 
-    const folhaarv = getTexture('../assets/textures/grass.jpg');
-    const troncoarv = getTexture('../assets/textures/wood.png');
+    const folhaarv = getTexture('./texturas/grass.jpg');
+    const troncoarv = getTexture('./texturas/wood.png');
     const folhaMaterial = new THREE.MeshLambertMaterial({ map: folhaarv });
     const troncoMaterial = new THREE.MeshLambertMaterial({ map: troncoarv });
     // === Converter novamente para Mesh (mantendo materiais distintos) ===
@@ -207,7 +207,7 @@ export function criaTunel()
     // 3. **NOVO**: Corta a metade inferior
     tunelCSG = tunelCSG.subtract(CSG.fromMesh(corteInferiorMesh)); // Subtrai a caixa de corte inferior
 
-    const cement = getTexture('../assets/textures/darkcement.jpg');
+    const cement = getTexture('./texturas/darkcement.jpg');
     const tunelMaterial = new THREE.MeshLambertMaterial({ map: cement });
 
     const tunelMesh = CSG.toMesh(tunelCSG, new THREE.Matrix4(), tunelMaterial);

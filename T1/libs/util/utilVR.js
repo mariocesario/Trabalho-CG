@@ -45,8 +45,8 @@ export function createVRBasicScene(scene, camera, mixer)
 
 	// Load all textures 
 	var textureLoader = new THREE.TextureLoader();
-		var floor 	= textureLoader.load('../assets/textures/sand.jpg');	
-		var cubeTex = textureLoader.load('../assets/textures/crate.jpg');			
+		var floor 	= textureLoader.load('./texturas/sand.jpg');	
+		var cubeTex = textureLoader.load('./texturas/crate.jpg');			
 
 	// Create Ground Plane
 	var groundPlane = createGroundPlane(60.0, 60.0, 100, 100, "rgb(200,200,150)");

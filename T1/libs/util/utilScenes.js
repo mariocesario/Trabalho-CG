@@ -23,7 +23,7 @@ export function loadLightPostScene(scene)
 
    // Ground plane
    let textureLoader = new THREE.TextureLoader();
-   let floor = textureLoader.load('../../assets/textures/intertravado.jpg');
+   let floor = textureLoader.load('./texturas/intertravado.jpg');
    let planeGeometry = new THREE.PlaneGeometry(15, 15, 80, 80);
    let planeMaterial = new THREE.MeshLambertMaterial({side:THREE.DoubleSide});
    let groundPlane = new THREE.Mesh(planeGeometry, planeMaterial);

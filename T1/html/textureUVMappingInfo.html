@@ -53,7 +53,7 @@
 			geometry.setAttribute( 'uv', new THREE.BufferAttribute( new Float32Array( uvCoords), 2 ) );
 			
 			// Load the texture and set to the material of the mesh
-			let texture = new THREE.TextureLoader().load('../assets/textures/art.jpg');
+			let texture = new THREE.TextureLoader().load('./texturas/art.jpg');
 			material.map =  texture;
 		}
 		</code>

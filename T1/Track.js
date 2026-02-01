@@ -183,7 +183,7 @@ export function createLTrackElements(trackGroup, material) {
       const waterWidth = 70;
       const waterGeometry = new THREE.PlaneGeometry(waterWidth, trackWidth);
       const textureLoader = new THREE.TextureLoader();
-      const waterNormals = textureLoader.load('../assets/textures/NormalMapping/waternormals.jpg', function(t){ t.wrapS = t.wrapT = THREE.RepeatWrapping; });
+      const waterNormals = textureLoader.load('./texturas/NormalMapping/waternormals.jpg', function(t){ t.wrapS = t.wrapT = THREE.RepeatWrapping; });
       const water = new Water(waterGeometry, {
         textureWidth: 512,
         textureHeight: 512,

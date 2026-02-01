@@ -26,7 +26,7 @@ function getMaterial(texturePath, materialType = THREE.MeshLambertMaterial) {
 }
 
 export function texturaAsfalto(geometria) {
-  const asfalto = getTexture('../assets/textures/asfalto.jpg');
+  const asfalto = getTexture('./texturas/asfalto.jpg');
   asfalto.wrapS = THREE.RepeatWrapping;
   asfalto.wrapT = THREE.RepeatWrapping;
   asfalto.repeat.x = 2;
@@ -37,12 +37,12 @@ export function texturaAsfalto(geometria) {
 }
 
 export function texturaFolha(geometria) {
-  const material = getMaterial('../assets/textures/grass.jpg');
+  const material = getMaterial('./texturas/grass.jpg');
   return new THREE.Mesh(geometria, material);
 }
 
 export function Skybox(scene) {
-  const textureEquirec = getTexture('../assets/textures/skybox/panorama1.jpg');
+  const textureEquirec = getTexture('./texturas/skybox/panorama1.jpg');
   textureEquirec.mapping = THREE.EquirectangularReflectionMapping;
   scene.background = textureEquirec;
 }
@@ -50,11 +50,11 @@ export function Skybox(scene) {
 export function texturaExterna(geometria, n) {
   let texturePath;
   if (n == 1) {
-    texturePath = '../assets/textures/grass.jpg';
+    texturePath = './texturas/grass.jpg';
   } else if (n == 2) {
-    texturePath = '../assets/textures/sand.jpg';
+    texturePath = './texturas/sand.jpg';
   } else {
-    texturePath = '../assets/textures/cement.jpg';
+    texturePath = './texturas/cement.jpg';
   }
 
   const material = getMaterial(texturePath);
@@ -65,7 +65,7 @@ export function texturaBarreira(geometria) {
   let geoMaterials = [
         setMaterial('./texturas/barreira.jpg'),
         setMaterial('./texturas/barreira.jpg'),
-        setMaterial('../assets/textures/crate.jpg'),
+        setMaterial('./texturas/crate.jpg'),
         new THREE.MeshBasicMaterial({color:'rgb(255,255,255)'}),
         setMaterial('./texturas/barreira.jpg'),
         setMaterial('./texturas/barreira.jpg')
@@ -76,12 +76,12 @@ export function texturaBarreira(geometria) {
 export function texturaPistaElevada(geometria)
 {
     let geoMaterials = [
-        setMaterial('../assets/textures/stone.jpg'),
-        setMaterial('../assets/textures/stone.jpg'),
-        setMaterial('../assets/textures/asfalto.jpg'),
-        setMaterial('../assets/textures/stone.jpg'),
-        setMaterial('../assets/textures/stone.jpg'),
-        setMaterial('../assets/textures/stone.jpg')
+        setMaterial('./texturas/stone.jpg'),
+        setMaterial('./texturas/stone.jpg'),
+        setMaterial('./texturas/asfalto.jpg'),
+        setMaterial('./texturas/stone.jpg'),
+        setMaterial('./texturas/stone.jpg'),
+        setMaterial('./texturas/stone.jpg')
     ];
 
     let pista = new THREE.Mesh(geometria, geoMaterials);
