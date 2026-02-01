@@ -1,38 +1,15 @@
 import * as THREE from 'three';
 import { setDefaultMaterial } from "./libs/util/util.js";
 
-// Tenta tocar um arquivo de áudio com vários prefixes (todos os sons na pasta sounds/)
-const SOUNDS_FOLDER = 'sounds/';
-
-function playWithFallbacks(filename, volume = 0.8) {
-  const bases = [location.origin + '/', '/', '../', ''];
-  const basename = filename.includes('/') ? filename.split('/').pop() : filename;
-
-  const candidatePaths = [];
-  bases.forEach(b => {
-    if (filename.includes('/')) {
-      candidatePaths.push(b + filename);
-    } else {
-      candidatePaths.push(b + SOUNDS_FOLDER + filename);
-    }
-    candidatePaths.push(b + SOUNDS_FOLDER + basename);
-  });
-
-  const tryPlay = (i) => {
-    if (i >= candidatePaths.length) return;
-    try {
-      const src = encodeURI(candidatePaths[i]);
-      const a = new Audio(src);
-      a.preload = 'auto';
-      a.volume = volume;
-      a.currentTime = 0;
-      const p = a.play();
-      if (p && p.catch) p.catch(() => { tryPlay(i + 1); });
-    } catch (e) {
-      tryPlay(i + 1);
-    }
-  };
-  tryPlay(0);
+function playSound(filename, volume = 0.8) {
+  const src = './sounds/' + filename;
+  try {
+    const a = new Audio(src);
+    a.preload = 'auto';
+    a.volume = volume;
+    a.currentTime = 0;
+    a.play();
+  } catch (e) {}
 }
 
 // Cria um projétil que sai do nariz do veículo
@@ -81,8 +58,7 @@ export function shootFromCar(car, scene, options = {}) {
 
   car.userData.projectiles.push(proj);
 
-  // Toca som do laser quando disparado (arquivo na pasta sounds/)
-  try { playWithFallbacks('laser.mp3', 0.9); } catch (e) {}
+  try { playSound('laser.mp3', 0.9); } catch (e) {}
 
   return proj;
 }
@@ -158,7 +134,7 @@ export function updateProjectiles(car, delta, targets = [], scene = null) {
           }
 
           // toca som específico se o jogador foi atingido (arquivo agora em T1/)
-          try { if (target.userData && target.userData.isPlayer) playWithFallbacks('bat_hit.mp3', 0.9); } catch(e) {}
+          try { if (target.userData && target.userData.isPlayer) playSound('bat_hit.mp3', 0.9); } catch(e) {}
 
         // remove projétil da cena
         if (p.parent) p.parent.remove(p);

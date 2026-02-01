@@ -177,39 +177,27 @@ countdownDiv.style.display = "none";
 document.body.appendChild(countdownDiv);
 
 // ------------------------------------------------------------
-// SONS — tenta carregar os arquivos de início em vários prefixes
+// SONS — ./sounds/ + nome do arquivo
 // ------------------------------------------------------------
 const startFileNames = ['start01.mp3', 'start02.mp3'];
 const startSounds = [];
 let nextStartSoundIndex = 0;
 
-const SOUNDS_FOLDER = 'sounds/';
-
-function tryLoadAudioWithBases(filename, bases, onLoaded, onFail) {
-  let i = 0;
-  function tryNext() {
-    if (i >= bases.length) { if (onFail) onFail(); return; }
-    const src = bases[i] + SOUNDS_FOLDER + filename;
-    const a = new Audio();
-    a.preload = 'auto';
-    let handled = false;
-    a.addEventListener('canplaythrough', () => { if (handled) return; handled = true; onLoaded(a); });
-    a.addEventListener('error', () => { if (handled) return; handled = true; i++; tryNext(); });
-    a.src = src;
-    // start loading
-    a.load();
-  }
-  tryNext();
+function loadSound(filename, onLoaded, onFail) {
+  const src = './sounds/' + filename;
+  const a = new Audio();
+  a.preload = 'auto';
+  a.addEventListener('canplaythrough', () => onLoaded(a));
+  a.addEventListener('error', () => { if (onFail) onFail(); });
+  a.src = src;
+  a.load();
 }
 
-// candidate bases: tente primeiro o root absoluto (location.origin), depois '/' e relativos
-const assetBases = [location.origin + '/', '/', '../', ''];
 startFileNames.forEach((fname, idx) => {
-  tryLoadAudioWithBases(fname, assetBases, (audio) => {
+  loadSound(fname, (audio) => {
     startSounds[idx] = audio;
   }, () => {
-    // fallback: attempt direct path (pasta sounds)
-    try { const a = new Audio(encodeURI(SOUNDS_FOLDER + fname)); a.preload='auto'; startSounds[idx]=a; } catch(e){}
+    try { const a = new Audio('./sounds/' + fname); a.preload = 'auto'; startSounds[idx] = a; } catch (e) {}
   });
 });
 
@@ -235,18 +223,18 @@ let bgAudio = null; // atualmente tocando
 let bgEnabled = true; // começa ligada
 
 bgFileNames.forEach((fname, idx) => {
-  tryLoadAudioWithBases(fname, assetBases, (audio) => {
+  loadSound(fname, (audio) => {
     audio.loop = true;
     audio.preload = 'auto';
     bgAudios[idx] = audio;
   }, () => {
-    try { const a = new Audio(encodeURI(SOUNDS_FOLDER + fname)); a.loop=true; a.preload='auto'; bgAudios[idx]=a; } catch(e){}
+    try { const a = new Audio('./sounds/' + fname); a.loop = true; a.preload = 'auto'; bgAudios[idx] = a; } catch (e) {}
   });
 });
 
 // last lap sound
 let lastLapAudio = null;
-tryLoadAudioWithBases('lastLap.mp3', assetBases, (audio) => { lastLapAudio = audio; }, () => { try { lastLapAudio = new Audio(encodeURI(SOUNDS_FOLDER + 'lastLap.mp3')); } catch(e){} });
+loadSound('lastLap.mp3', (audio) => { lastLapAudio = audio; }, () => { try { lastLapAudio = new Audio('./sounds/lastLap.mp3'); } catch (e) {} });
 
 function stopBackground() {
   try {
