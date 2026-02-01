@@ -25,12 +25,14 @@ function buildHovercraft(baseMat, bodyMat, cabineMat, noseMat) {
   const craft = new THREE.Group();
 
   const base = texturaCarroBase(new THREE.TorusGeometry(1.3, 0.25, 16, 32));
-
+  base.castShadow = true;
+  base.receiveShadow = true;
   base.rotation.x = Math.PI / 2;
   craft.add(base);
 
   const body = texturaCarroCorpo(new THREE.CylinderGeometry(1.2, 1.4, 0.8, 16),2,bodyMat);
-
+  body.castShadow = true;
+  body.receiveShadow = true;
   body.position.y = 0.55;
   craft.add(body);
 
@@ -38,10 +40,14 @@ function buildHovercraft(baseMat, bodyMat, cabineMat, noseMat) {
     new THREE.BoxGeometry(1.0, 0.5, 0.7),
     cabineMat
   );
+  cabine.castShadow = true;
+  cabine.receiveShadow = true;
   cabine.position.set(0, 1.0, 0);
   craft.add(cabine);
 
-  const nose = texturaCarroCorpo(new THREE.ConeGeometry(0.4, 1.0, 16),2,noseMat)
+  const nose = texturaCarroCorpo(new THREE.ConeGeometry(0.4, 1.0, 16),2,noseMat);
+  nose.castShadow = true;
+  nose.receiveShadow = true;
   nose.rotation.z = Math.PI / 2;
   nose.position.set(1.7, 0.35, 0);
   nose.name = 'nose';

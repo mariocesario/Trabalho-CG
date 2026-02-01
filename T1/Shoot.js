@@ -1,23 +1,21 @@
 import * as THREE from 'three';
 import { setDefaultMaterial } from "./libs/util/util.js";
 
-// Tenta tocar um arquivo de áudio com vários prefixes para evitar 404s quando rodando em subpastas
-// Agora tenta procurar em `T1/` primeiro (os arquivos foram copiados para essa pasta),
-// depois faz fallback para `0_assets_T3/` e outros prefixes.
+// Tenta tocar um arquivo de áudio com vários prefixes (todos os sons na pasta sounds/)
+const SOUNDS_FOLDER = 'sounds/';
+
 function playWithFallbacks(filename, volume = 0.8) {
   const bases = [location.origin + '/', '/', '../', ''];
   const basename = filename.includes('/') ? filename.split('/').pop() : filename;
 
-  // monta lista de candidatos. Se filename contém caminho (ex: 'T1/laser.mp3'),
-  // tenta esse caminho primeiro em cada base; em seguida tenta em 0_assets_T3/ como fallback.
   const candidatePaths = [];
   bases.forEach(b => {
     if (filename.includes('/')) {
       candidatePaths.push(b + filename);
     } else {
-      candidatePaths.push(b + 'T1/' + filename); // prioridade para T1/
+      candidatePaths.push(b + SOUNDS_FOLDER + filename);
     }
-    candidatePaths.push(b + '0_assets_T3/' + basename); // fallback antigo
+    candidatePaths.push(b + SOUNDS_FOLDER + basename);
   });
 
   const tryPlay = (i) => {
@@ -83,8 +81,8 @@ export function shootFromCar(car, scene, options = {}) {
 
   car.userData.projectiles.push(proj);
 
-  // Toca som do laser quando disparado (arquivo agora em T1/)
-  try { playWithFallbacks('T1/laser.mp3', 0.9); } catch (e) {}
+  // Toca som do laser quando disparado (arquivo na pasta sounds/)
+  try { playWithFallbacks('laser.mp3', 0.9); } catch (e) {}
 
   return proj;
 }
@@ -160,7 +158,7 @@ export function updateProjectiles(car, delta, targets = [], scene = null) {
           }
 
           // toca som específico se o jogador foi atingido (arquivo agora em T1/)
-          try { if (target.userData && target.userData.isPlayer) playWithFallbacks('T1/bat_hit.mp3', 0.9); } catch(e) {}
+          try { if (target.userData && target.userData.isPlayer) playWithFallbacks('bat_hit.mp3', 0.9); } catch(e) {}
 
         // remove projétil da cena
         if (p.parent) p.parent.remove(p);

@@ -35,23 +35,22 @@ export function initLight(scene, car) {
     scene.add(dirLight.target);
   }
 
-  // === Parâmetros de sombra (dinâmicos) ===
+  // === Parâmetros de sombra (área ampla para player, túnel, pista e chão) ===
   const isMobile = typeof navigator !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  // diminuir ainda mais para melhorar performance: mobile=512, desktop=1024
-  const shadowSize = isMobile ? 512 : 1024;
+  const shadowSize = isMobile ? 1024 : 2048;
   dirLight.shadow.mapSize.width = shadowSize;
   dirLight.shadow.mapSize.height = shadowSize;
 
-  // reduzir alcance da câmera de sombra para concentrar resolução
-  const d = 80;
+  // câmera de sombra ampla para cobrir pista, túnel, carros e chão
+  const d = 150;
   dirLight.shadow.camera.left = -d;
   dirLight.shadow.camera.right = d;
   dirLight.shadow.camera.top = d;
   dirLight.shadow.camera.bottom = -d;
   dirLight.shadow.camera.near = 0.5;
-  dirLight.shadow.camera.far = 500;
+  dirLight.shadow.camera.far = 600;
 
-  dirLight.shadow.bias = -0.0005;
+  dirLight.shadow.bias = -0.0008;
   dirLight.shadow.normalBias = 0.02;
 
   scene.add(dirLight);

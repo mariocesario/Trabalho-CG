@@ -18,6 +18,7 @@ function makeBlock(geom, pos, isRed) {
   const mesh = texturaBarreira(geom);
   mesh.position.copy(pos);
   mesh.castShadow = true;
+  mesh.receiveShadow = true;
 
   const bb = new THREE.Box3().setFromObject(mesh);
   return { mesh, bb };

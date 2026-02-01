@@ -183,11 +183,13 @@ const startFileNames = ['start01.mp3', 'start02.mp3'];
 const startSounds = [];
 let nextStartSoundIndex = 0;
 
+const SOUNDS_FOLDER = 'sounds/';
+
 function tryLoadAudioWithBases(filename, bases, onLoaded, onFail) {
   let i = 0;
   function tryNext() {
     if (i >= bases.length) { if (onFail) onFail(); return; }
-    const src = bases[i] + '0_assets_T3/' + filename;
+    const src = bases[i] + SOUNDS_FOLDER + filename;
     const a = new Audio();
     a.preload = 'auto';
     let handled = false;
@@ -206,8 +208,8 @@ startFileNames.forEach((fname, idx) => {
   tryLoadAudioWithBases(fname, assetBases, (audio) => {
     startSounds[idx] = audio;
   }, () => {
-    // fallback: attempt direct path without folder
-    try { const a = new Audio(encodeURI('0_assets_T3/' + fname)); a.preload='auto'; startSounds[idx]=a; } catch(e){}
+    // fallback: attempt direct path (pasta sounds)
+    try { const a = new Audio(encodeURI(SOUNDS_FOLDER + fname)); a.preload='auto'; startSounds[idx]=a; } catch(e){}
   });
 });
 
@@ -238,13 +240,13 @@ bgFileNames.forEach((fname, idx) => {
     audio.preload = 'auto';
     bgAudios[idx] = audio;
   }, () => {
-    try { const a = new Audio(encodeURI('0_assets_T3/' + fname)); a.loop=true; a.preload='auto'; bgAudios[idx]=a; } catch(e){}
+    try { const a = new Audio(encodeURI(SOUNDS_FOLDER + fname)); a.loop=true; a.preload='auto'; bgAudios[idx]=a; } catch(e){}
   });
 });
 
 // last lap sound
 let lastLapAudio = null;
-tryLoadAudioWithBases('lastLap.mp3', assetBases, (audio) => { lastLapAudio = audio; }, () => { try { lastLapAudio = new Audio(encodeURI('0_assets_T3/lastLap.mp3')); } catch(e){} });
+tryLoadAudioWithBases('lastLap.mp3', assetBases, (audio) => { lastLapAudio = audio; }, () => { try { lastLapAudio = new Audio(encodeURI(SOUNDS_FOLDER + 'lastLap.mp3')); } catch(e){} });
 
 function stopBackground() {
   try {
